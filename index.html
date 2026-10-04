@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Πίνακας Ελέγχου Μαθήματος</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Main Container -->
+  <!-- Κεντρικό Πλαίσιο -->
+  <div class="dashboard-container">
+    
+    <!-- Header Section -->
+    <!-- Ενότητα Κεφαλίδας -->
+    <header class="dashboard-header">
+      <h1 id="courseTitle">Προετοιμασία Μαθήματος...</h1>
+      <p id="courseMeta"></p>
+    </header>
+
+    <!-- Main Content Layout -->
+    <!-- Διάταξη Κύριου Περιεχομένου -->
+    <main class="dashboard-grid">
+      
+      <!-- Sidebar / Course Info & Schedule -->
+      <!-- Πλευρική Στήλη / Πληροφορίες & Πρόγραμμα -->
+      <aside class="sidebar">
+        
+        <!-- Instructors Card -->
+        <!-- Κάρτα Εκπαιδευτών -->
+        <section class="card">
+          <h2>Εκπαιδευτής</h2>
+          <div id="instructorInfo"></div>
+        </section>
+
+        <!-- Schedule Card -->
+        <!-- Κάρτα Ωρολογίου Προγράμματος -->
+        <section class="card">
+          <h2>Ωρολόγιο Πρόγραμμα</h2>
+          <ul id="scheduleList" class="schedule-list"></ul>
+        </section>
+
+      </aside>
+
+      <!-- Weekly Modules Section -->
+      <!-- Ενότητα Εβδομαδιαίων Υποενοτήτων -->
+      <section class="modules-section card">
+        <h2>Εβδομαδιαίες Ενότητες</h2>
+        <div id="weeksGrid" class="weeks-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Load Config & Main Script -->
+  <!-- Φόρτωση Ρυθμίσεων & Κύριου Σεναρίου -->
+  <script src="config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

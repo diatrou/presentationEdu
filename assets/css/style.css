@@ -107,3 +107,91 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border-color: #2563eb;
 }
+
+/* Forms & Admin Panel Styles */
+/* Στυλ Φορμών & Πίνακα Διαχείρισης */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input, 
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.row input, 
+.row select {
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* Buttons */
+/* Κουμπιά */
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.btn-success {
+  background: #10b981;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: #dc2626;
+  flex: none;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* Code Output Area */
+/* Περιοχή Εξόδου Κώδικα */
+pre {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 15px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}

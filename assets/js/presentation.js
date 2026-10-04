@@ -10,17 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Έλεγχος ρυθμίσεων και εβδομάδας στόχου
   if (!window.CONFIG || !window.CONFIG.weeks) {
     console.error('Configuration missing or invalid.');
+    showError('Το αρχείο ρυθμίσεων λείπει ή είναι μη έγκυρο.');
     return;
   }
 
   const weekConfig = window.CONFIG.weeks.find(w => w.id === weekId);
   if (!weekConfig) {
-    document.getElementById('slidesContainer').innerHTML = `
-      <section>
-        <h2>Η εβδομάδα ${weekId} δεν βρέθηκε!</h2>
-        <p><a href="index.html">Επιστροφή στον Πίνακα Ελέγχου</a></p>
-      </section>
-    `;
+    showError(`Η εβδομάδα ${weekId} δεν βρέθηκε!`);
     return;
   }
 
@@ -52,32 +48,51 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   script.onerror = () => {
+    script.remove();
     showError(`Αποτυχία φόρτωσης του αρχείου: ${weekConfig.file}`);
   };
 
   document.head.appendChild(script);
 });
 
-// Render Slides HTML Structure
-// Δημιουργία HTML Δομής Διαφανειών
+// Render Slides HTML Structure (Supports Horizontal & Vertical Slides)
+// Δημιουργία HTML Δομής Διαφανειών (Υποστηρίζει Οριζόντιες & Κατακόρυφες Διαφάνειες)
 function renderSlides(slides) {
   const container = document.getElementById('slidesContainer');
-  container.innerHTML = slides.map(slide => `
-    <section>
-      <h2>${slide.title}</h2>
-      ${slide.content}
-    </section>
-  `).join('');
+  
+  container.innerHTML = slides.map(slide => {
+    // Αν η διαφάνεια περιέχει υπο-διαφάνειες (vertical slides)
+    if (slide.subslides && Array.isArray(slide.subslides)) {
+      const innerSlides = slide.subslides.map(sub => `
+        <section>
+          ${sub.title ? `<h2>${sub.title}</h2>` : ''}
+          ${sub.content || ''}
+        </section>
+      `).join('');
+      return `<section>${innerSlides}</section>`;
+    }
+
+    // Απλή οριζόντια διαφάνεια
+    return `
+      <section>
+        ${slide.title ? `<h2>${slide.title}</h2>` : ''}
+        ${slide.content || ''}
+      </section>
+    `;
+  }).join('');
 }
 
 // Render Error Message
 // Εμφάνιση Μηνύματος Σφάλματος
 function showError(message) {
-  document.getElementById('slidesContainer').innerHTML = `
-    <section>
-      <h2>Σφάλμα</h2>
-      <p>${message}</p>
-      <p><a href="index.html">Επιστροφή στον Πίνακα Ελέγχου</a></p>
-    </section>
-  `;
+  const container = document.getElementById('slidesContainer');
+  if (container) {
+    container.innerHTML = `
+      <section>
+        <h2>Σφάλμα</h2>
+        <p>${message}</p>
+        <p><a href="index.html">Επιστροφή στον Πίνακα Ελέγχου</a></p>
+      </section>
+    `;
+  }
 }

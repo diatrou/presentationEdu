@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Διαχείριση Ρυθμίσεων</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background: #f8f9fa; color: #333; }
+    h1, h2 { color: #1e293b; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], input[type="email"], select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+    .row input { flex: 1; }
+    button { background: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #1d4ed8; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+    pre { background: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <h1>Παραγωγή Κώδικα Ρυθμίσεων `config.js`</h1>
+
+  <div class="card">
+    <h2>Γενικές Πληροφορίες</h2>
+    <div class="form-group">
+      <label>Σχολή:</label>
+      <input type="text" id="institution" value="Σ.Α.Ε.Κ.">
+    </div>
+    <div class="form-group">
+      <label>Εξάμηνο:</label>
+      <input type="text" id="semester" value="Χειμερινό 2026Β">
+    </div>
+    <div class="form-group">
+      <label>Ειδικότητα:</label>
+      <input type="text" id="department" value="Τεχνικός Εφαρμογών Πληροφορικής (Πολυμέσα / Web Designer-Developer / Video Games)">
+    </div>
+    <div class="form-group">
+      <label>Τίτλος Μαθήματος:</label>
+      <input type="text" id="courseTitle" value="Εργαλεία Ανάπτυξης Εφαρμογών Διαδικτύου">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Στοιχεία Εκπαιδευτή</h2>
+    <div class="form-group">
+      <label>Όνομα:</label>
+      <input type="text" id="instructorName" value="Δημήτριος Ιατρού">
+    </div>
+    <div class="form-group">
+      <label>Email:</label>
+      <input type="email" id="instructorEmail" value="iatroud@gmail.com">
+    </div>
+    <div class="form-group">
+      <label>Ρόλος:</label>
+      <input type="text" id="instructorRole" value="Εκπαιδευτής">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
+    <div id="scheduleContainer">
+      <div class="row schedule-item">
+        <select class="sched-type">
+          <option value="lecture" selected>Διδακτική Ώρα</option>
+          <option value="break">Διάλειμμα</option>
+        </select>
+        <input type="text" class="sched-label" placeholder="Ετικέτα (π.χ. 1η Διδακτική Ώρα)" value="1η Διδακτική Ώρα">
+        <input type="text" class="sched-start" placeholder="Έναρξη (15:00)" value="15:00">
+        <input type="text" class="sched-end" placeholder="Λήξη (15:45)" value="15:45">
+        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+      </div>
+    </div>
+    <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
+  </div>
+
+  <button type="button" onclick="generateConfig()" style="font-size: 16px; width: 100%;">Παραγωγή Κώδικα `config.js`</button>
+
+  <div class="card" style="margin-top: 20px;">
+    <h2>Παραγόμενος Κώδικας JavaScript</h2>
+    <pre id="outputCode">// Πατήστε το κουμπί παραπάνω για παραγωγή κώδικα...</pre>
+    <button type="button" onclick="copyCode()">Αντιγραφή Κώδικα</button>
+  </div>
+
+  <script>
+    function addScheduleRow() {
+      const container = document.getElementById('scheduleContainer');
+      const div = document.createElement('div');
+      div.className = 'row schedule-item';
+      div.innerHTML = `
+        <select class="sched-type">
+          <option value="lecture">Διδακτική Ώρα</option>
+          <option value="break">Διάλειμμα</option>
+        </select>
+        <input type="text" class="sched-label" placeholder="Ετικέτα">
+        <input type="text" class="sched-start" placeholder="Έναρξη">
+        <input type="text" class="sched-end" placeholder="Λήξη">
+        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function removeRow(btn) {
+      btn.parentElement.remove();
+    }
+
+    function generateConfig() {
+      const scheduleItems = [];
+      document.querySelectorAll('.schedule-item').forEach(row => {
+        scheduleItems.push({
+          type: row.querySelector('.sched-type').value,
+          label: row.querySelector('.sched-label').value,
+          start: row.querySelector('.sched-start').value,
+          end: row.querySelector('.sched-end').value
+        });
+      });
+
+      const configText = `window.CONFIG = {
+  // General institution & course information
+  // Γενικές πληροφορίες σχολής & μαθήματος
+  institution: "${document.getElementById('institution').value}",
+  semester: "${document.getElementById('semester').value}",
+  department: "${document.getElementById('department').value}",
+  courseTitle: "${document.getElementById('courseTitle').value}",
+  
+  // Instructor details
+  // Στοιχεία εκπαιδευτών
+  instructors: [
+    {
+      name: "${document.getElementById('instructorName').value}",
+      email: "${document.getElementById('instructorEmail').value}",
+      role: "${document.getElementById('instructorRole').value}"
+    }
+  ],
+
+  // Schedule timeline (Lecture hours & breaks)
+  // Ωρολόγιο πρόγραμμα (Διδακτικές ώρες & διαλείμματα)
+  schedule: ${JSON.stringify(scheduleItems, null, 4)},
+
+  // List of weekly modules
+  // Λίστα εβδομαδιαίων υποενοτήτων
+  weeks: [
+    { id: 1, title: "Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο", file: "assets/data/week01.js" }
+  ]
+};`;
+
+      document.getElementById('outputCode').textContent = configText;
+    }
+
+    function copyCode() {
+      const code = document.getElementById('outputCode').textContent;
+      navigator.clipboard.writeText(code);
+      alert('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
+    }
+  </script>
+</body>
+</html>

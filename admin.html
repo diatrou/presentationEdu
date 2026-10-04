@@ -15,9 +15,12 @@
     .row input { flex: 1; }
     button { background: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     button:hover { background: #1d4ed8; }
+    .btn-success { background: #10b981; }
+    .btn-success:hover { background: #059669; }
     .btn-danger { background: #dc2626; }
     .btn-danger:hover { background: #b91c1c; }
     pre { background: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
+    .actions { display: flex; gap: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -82,7 +85,10 @@
   <div class="card" style="margin-top: 20px;">
     <h2>Παραγόμενος Κώδικας JavaScript</h2>
     <pre id="outputCode">// Πατήστε το κουμπί παραπάνω για παραγωγή κώδικα...</pre>
-    <button type="button" onclick="copyCode()">Αντιγραφή Κώδικα</button>
+    <div class="actions">
+      <button type="button" onclick="copyCode()">Αντιγραφή Κώδικα</button>
+      <button type="button" class="btn-success" onclick="saveConfigFile()">Αποθήκευση ως `config.js`</button>
+    </div>
   </div>
 
   <script>
@@ -152,8 +158,52 @@
 
     function copyCode() {
       const code = document.getElementById('outputCode').textContent;
+      if (!code || code.startsWith('//')) {
+        alert('Παρακαλώ παράγετε πρώτα τον κώδικα!');
+        return;
+      }
       navigator.clipboard.writeText(code);
       alert('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
+    }
+
+    async function saveConfigFile() {
+      const code = document.getElementById('outputCode').textContent;
+      if (!code || code.startsWith('//')) {
+        alert('Παρακαλώ παράγετε πρώτα τον κώδικα!');
+        return;
+      }
+
+      // Τρόπος 1: File System Access API (Αντικατάσταση αρχείου)
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'config.js',
+            types: [{
+              description: 'JavaScript File',
+              accept: { 'text/javascript': ['.js'] },
+            }],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(code);
+          await writable.close();
+          alert('Το αρχείο αποθηκεύτηκε επιτυχώς!');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return; // Ο χρήστης ακύρωσε το παράθυρο
+          console.warn('Αποτυχία File System Access API, μετάβαση σε Blob download...', err);
+        }
+      }
+
+      // Τρόπος 2: Fallback - Download Link Blob (Για μη υποστηριζόμενους περιηγητές)
+      const blob = new Blob([code], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'config.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>

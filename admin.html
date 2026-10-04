@@ -71,6 +71,19 @@
     <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
   </div>
 
+  <div class="card">
+    <h2>Εβδομαδιαίες Ενότητες Μαθήματος</h2>
+    <div id="weeksContainer">
+      <div class="row week-item">
+        <input type="number" class="week-id" placeholder="ΑΡ" value="1" style="width: 70px; flex: none;">
+        <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο">
+        <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week01.js">
+        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+      </div>
+    </div>
+    <button type="button" onclick="addWeekRow()">+ Προσθήκη Εβδομάδας</button>
+  </div>
+
   <button type="button" onclick="generateConfig()" style="font-size: 16px; width: 100%;">Παραγωγή Κώδικα `config.js`</button>
 
   <div class="card" style="margin-top: 20px;">
@@ -83,6 +96,7 @@
   </div>
 
   <script>
+    // --- Προσθήκη & Αφαίρεση Γραμμών ---
     function addScheduleRow() {
       const container = document.getElementById('scheduleContainer');
       const div = document.createElement('div');
@@ -100,12 +114,39 @@
       container.appendChild(div);
     }
 
+    function addWeekRow() {
+      const container = document.getElementById('weeksContainer');
+      const nextId = container.querySelectorAll('.week-item').length + 1;
+      const padId = String(nextId).padStart(2, '0');
+      
+      const div = document.createElement('div');
+      div.className = 'row week-item';
+      div.innerHTML = `
+        <input type="number" class="week-id" placeholder="ΑΡ" value="${nextId}" style="width: 70px; flex: none;">
+        <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας">
+        <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week${padId}.js">
+        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+      `;
+      container.appendChild(div);
+    }
+
     function removeRow(btn) {
       btn.parentElement.remove();
     }
 
+    // --- Παραγωγή Config ---
     function generateConfig() {
       const scheduleItems = [];
+      const weekItems = [];
+
+      document.querySelectorAll('.week-item').forEach(row => {
+        weekItems.push({
+          id: parseInt(row.querySelector('.week-id').value, 10),
+          title: row.querySelector('.week-title').value,
+          file: row.querySelector('.week-file').value
+        });
+      });
+
       document.querySelectorAll('.schedule-item').forEach(row => {
         scheduleItems.push({
           type: row.querySelector('.sched-type').value,
@@ -117,14 +158,12 @@
 
       const configText = `window.CONFIG = {
   // General institution & course information
-  // Γενικές πληροφορίες σχολής & μαθήματος
   institution: "${document.getElementById('institution').value}",
   semester: "${document.getElementById('semester').value}",
   department: "${document.getElementById('department').value}",
   courseTitle: "${document.getElementById('courseTitle').value}",
   
   // Instructor details
-  // Στοιχεία εκπαιδευτών
   instructors: [
     {
       name: "${document.getElementById('instructorName').value}",
@@ -134,19 +173,16 @@
   ],
 
   // Schedule timeline (Lecture hours & breaks)
-  // Ωρολόγιο πρόγραμμα (Διδακτικές ώρες & διαλείμματα)
   schedule: ${JSON.stringify(scheduleItems, null, 4)},
 
   // List of weekly modules
-  // Λίστα εβδομαδιαίων υποενοτήτων
-  weeks: [
-    { id: 1, title: "Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο", file: "assets/data/week01.js" }
-  ]
+  weeks: ${JSON.stringify(weekItems, null, 4)}
 };`;
 
       document.getElementById('outputCode').textContent = configText;
     }
 
+    // --- Εξαγωγή & Αποθήκευση ---
     function copyCode() {
       const code = document.getElementById('outputCode').textContent;
       if (!code || code.startsWith('//')) {
@@ -164,7 +200,6 @@
         return;
       }
 
-      // Τρόπος 1: File System Access API (Αντικατάσταση αρχείου)
       if ('showSaveFilePicker' in window) {
         try {
           const handle = await window.showSaveFilePicker({
@@ -180,12 +215,11 @@
           alert('Το αρχείο αποθηκεύτηκε επιτυχώς!');
           return;
         } catch (err) {
-          if (err.name === 'AbortError') return; // Ο χρήστης ακύρωσε το παράθυρο
+          if (err.name === 'AbortError') return;
           console.warn('Αποτυχία File System Access API, μετάβαση σε Blob download...', err);
         }
       }
 
-      // Τρόπος 2: Fallback - Download Link Blob (Για μη υποστηριζόμενους περιηγητές)
       const blob = new Blob([code], { type: 'text/javascript' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -197,5 +231,6 @@
       URL.revokeObjectURL(url);
     }
   </script>
+
 </body>
 </html>

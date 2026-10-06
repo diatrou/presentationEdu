@@ -1,35 +1,60 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/images/favicon.png">
-  <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Παρουσίαση Μαθήματος</title>
 
-  <title>Παρουσίαση Μαθήματος</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
 
-  <!-- reveal.js CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css" id="theme">
+    <!-- 1. Τοπικά CSS Βιβλιοθηκών -->
+    <link rel="stylesheet" href="assets/libs/reveal/reveal.css">
+    <link rel="stylesheet" href="assets/libs/reveal/theme/white.css" id="theme">
+    <link rel="stylesheet" href="assets/libs/highlight/monokai.css">
+
+    <!-- 2. Προσαρμοσμένο CSS Εφαρμογής -->
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-  <div class="reveal">
-    <div class="slides" id="slidesContainer">
-      <!-- Τα slides θα φορτωθούν δυναμικά από το JavaScript -->
-      <section>
-        <h2>Φόρτωση Παρουσίασης...</h2>
-      </section>
-    </div>
-  </div>
+    <!-- Μπάρα Ελέγχου (Control Bar) -->
+    <header id="control-bar" class="control-bar">
+        <button id="drawer-toggle-btn" class="btn">☰ Μενού</button>
+        <span id="week-title" class="week-title">Φόρτωση...</span>
+        <div id="schedule-timer" class="schedule-timer">--:--</div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="link-toggle-checkbox">
+            <span class="slider"></span>
+            <span class="label-text">Σύνδεσμοι</span>
+        </label>
+    </header>
 
-  <!-- reveal.js Core JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-  
-  <!-- App Configuration & Presentation Loader -->
-  <script src="config.js"></script>
-  <script src="assets/js/presentation.js"></script>
+    <!-- Πλευρικό Μενού (Side Drawer) -->
+    <aside id="side-drawer" class="side-drawer">
+        <button id="drawer-close-btn" class="close-btn">&times;</button>
+        <h3>Εβδομάδες Μαθήματος</h3>
+        <ul id="weeks-list" class="weeks-list">
+            <!-- Θα γεμίσει δυναμικά από το config.js -->
+        </ul>
+    </aside>
+
+    <!-- Κύριο Container Παρουσίασης Reveal.js -->
+    <main class="reveal">
+        <div class="slides" id="slidesContainer">
+            <!-- Οι διαφάνειες (<section>) θα δημιουργούνται δυναμικά -->
+        </div>
+    </main>
+
+    <!-- JavaScript Αρχεία -->
+    <!-- 1. Τοπικές Βιβλιοθήκες -->
+    <script src="assets/libs/reveal/reveal.js"></script>
+    <script src="assets/libs/highlight/highlight.js"></script>
+
+    <!-- 2. Ρυθμίσεις & Λογική Εφαρμογής -->
+    <script src="config.js"></script>
+    <script src="assets/js/schedule.js"></script>
+    <script src="assets/js/presentation.js"></script>
 </body>
 </html>

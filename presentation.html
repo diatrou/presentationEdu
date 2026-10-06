@@ -1,29 +1,48 @@
 <!DOCTYPE html>
+<!-- HTML5 doctype declaration for presentation viewer -->
+<!-- Δηλώση HTML5 για την προβολή παρουσιάσεων -->
 <html lang="el">
 <head>
+    <!-- Character encoding and viewport configuration -->
+    <!-- Κωδικοποίηση χαρακτήρων και ρυθμίσεις προσαρμοστικότητας -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Παρουσίαση Μαθήματος</title>
+    <title>Παρουσίαση Μαθήματος - Presentation Viewer</title>
 
-    <!-- Favicon -->
+    <!-- Application Favicon assets -->
+    <!-- Εικονίδια εφαρμογής Favicon -->
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <link rel="shortcut icon" href="assets/images/favicon.ico">
 
+    <!-- 1. External Third-Party Library Stylesheets -->
     <!-- 1. Τοπικά CSS Βιβλιοθηκών -->
     <link rel="stylesheet" href="assets/libs/reveal/reveal.css">
     <link rel="stylesheet" href="assets/libs/reveal/theme/white.css" id="theme">
     <link rel="stylesheet" href="assets/libs/highlight/monokai.css">
 
+    <!-- 2. Application Custom Stylesheets -->
     <!-- 2. Προσαρμοσμένο CSS Εφαρμογής -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
+    <!-- Top Navigation and Control Bar Header -->
     <!-- Μπάρα Ελέγχου (Control Bar) -->
     <header id="control-bar" class="control-bar">
-        <button id="drawer-toggle-btn" class="btn">☰ Μενού</button>
+        <!-- Drawer Menu Navigation Toggle Button -->
+        <!-- Κουμπί ανοίγματος πλευρικού μενού -->
+        <button id="drawer-toggle-btn" class="btn" aria-label="Άνοιγμα Μενού">☰ Μενού</button>
+        
+        <!-- Current Week Title Indicator -->
+        <!-- Τίτλος τρέχουσας εβδομάδας -->
         <span id="week-title" class="week-title">Φόρτωση...</span>
+        
+        <!-- Smart Class Schedule & Countdown Timer Container -->
+        <!-- Πλαίσιο ωρολογίου προγράμματος & χρονομέτρου -->
         <div id="schedule-timer" class="schedule-timer">--:--</div>
+        
+        <!-- Hyperlink Visibility Switch Toggle -->
+        <!-- Διακόπτης Εμφάνισης / Απόκρυψης Υπερσυνδέσμων -->
         <label class="toggle-switch">
             <input type="checkbox" id="link-toggle-checkbox">
             <span class="slider"></span>
@@ -31,27 +50,45 @@
         </label>
     </header>
 
-    <!-- Πλευρικό Μενού (Side Drawer) -->
-    <aside id="side-drawer" class="side-drawer">
-        <button id="drawer-close-btn" class="close-btn">&times;</button>
+    <!-- Side Slide Navigation Drawer Panel -->
+    <!-- Πλευρικό Μενού Πλοήγησης (Side Drawer) -->
+    <aside id="side-drawer" class="side-drawer" aria-hidden="true">
+        <!-- Close Drawer Action Button -->
+        <!-- Κουμπί κλεισίματος πλευρικού μενού -->
+        <button id="drawer-close-btn" class="close-btn" aria-label="Κλείσιμο Μενού">&times;</button>
+        
+        <!-- Drawer Header Title -->
+        <!-- Επικεφαλίδα πλευρικού μενού -->
         <h3>Εβδομάδες Μαθήματος</h3>
+        
+        <!-- Dynamic Slide Navigation Links Container -->
+        <!-- Λίστα συνδέσμων πλοήγησης διαφανειών -->
         <ul id="weeks-list" class="weeks-list">
-            <!-- Θα γεμίσει δυναμικά από το config.js -->
+            <!-- Dynamic content injected via presentation.js -->
+            <!-- Δυναμικό περιεχόμενο από το presentation.js -->
         </ul>
     </aside>
 
+    <!-- Main Reveal.js Presentation Slides Wrapper Container -->
     <!-- Κύριο Container Παρουσίασης Reveal.js -->
     <main class="reveal">
+        <!-- Slide Sections Parent Wrapper -->
+        <!-- Περιοχή τοποθέτησης διαφανειών -->
         <div class="slides" id="slidesContainer">
-            <!-- Οι διαφάνειες (<section>) θα δημιουργούνται δυναμικά -->
+            <!-- Dynamic slide elements (<section>) generated from JS -->
+            <!-- Οι διαφάνειες (<section>) δημιουργούνται δυναμικά -->
         </div>
     </main>
 
-    <!-- JavaScript Αρχεία -->
+    <!-- JavaScript Dependencies Loading Sequence -->
+    <!-- Σειρά Φόρτωσης Αρχείων JavaScript -->
+    
+    <!-- 1. Local Vendor Libraries (Reveal.js & Highlight.js) -->
     <!-- 1. Τοπικές Βιβλιοθήκες -->
     <script src="assets/libs/reveal/reveal.js"></script>
     <script src="assets/libs/highlight/highlight.js"></script>
 
+    <!-- 2. Application Configuration, Utilities and Logic -->
     <!-- 2. Ρυθμίσεις & Λογική Εφαρμογής -->
     <script src="config.js"></script>
     <script src="assets/js/schedule.js"></script>

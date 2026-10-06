@@ -222,6 +222,7 @@ function initReveal() {
     }
 }
 
+
 /**
  * Initialize UI control listeners and drawer content
  * Αρχικοποίηση στοιχείων UI (Drawer & Toggle Συνδέσμων)
@@ -258,19 +259,111 @@ function initUIControls() {
         closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
     }
 
-    // Populate drawer weekly navigation menu
-    // Γέμισμα λίστας εβδομάδων στο Drawer
-    if (weeksList && window.CONFIG && window.CONFIG.weeks) {
+    // Populate drawer with Dashboard link, section header, and multi-level numbered slides
+    // Γέμισμα λίστας Drawer με σύνδεσμο Dashboard (χωρίς εικονίδιο), τίτλο ενότητας και σωστή αρίθμηση επιπέδων
+    if (weeksList && window.CURRENT_WEEK_DATA) {
         weeksList.innerHTML = '';
-        window.CONFIG.weeks.forEach(w => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = `presentation.html?week=${w.id}`;
-            a.textContent = `Εβδομάδα ${w.id}: ${w.title}`;
-            li.appendChild(a);
-            weeksList.appendChild(li);
+
+        // Add link for returning to Dashboard (without icon)
+        // Προσθήκη συνδέσμου επιστροφής στον Πίνακα Ελέγχου (χωρίς εικονίδιο)
+        const dashLi = document.createElement('li');
+        dashLi.classList.add('dashboard-link-item');
+        const dashA = document.createElement('a');
+        dashA.href = 'index.html';
+        dashA.innerHTML = '<strong>Πίνακας Ελέγχου (Dashboard)</strong>';
+        dashLi.appendChild(dashA);
+        weeksList.appendChild(dashLi);
+
+        // Add separator
+        // Προσθήκη διαχωριστικού
+        const hrLi = document.createElement('li');
+        hrLi.innerHTML = '<hr style="border: 0; border-top: 1px solid #334155; margin: 12px 0;">';
+        weeksList.appendChild(hrLi);
+
+        // Add drawer section title for current week slides
+        // Προσθήκη τίτλου ενότητας διαφανειών εβδομάδας
+        const titleLi = document.createElement('li');
+        titleLi.innerHTML = `<span style="font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Διαφάνειες Εβδομάδας ${window.CURRENT_WEEK_DATA.week || ''}</span>`;
+        titleLi.style.marginBottom = '8px';
+        weeksList.appendChild(titleLi);
+
+        // Populate numbered slide titles ensuring all main sections get level 1 numbering
+        // Γέμισμα αριθμημένων τίτλων εξασφαλίζοντας ότι όλες οι κύριες ενότητες παίρνουν αρίθμηση 1ου επιπέδου
+        const slides = window.CURRENT_WEEK_DATA.slides || [];
+        let slideIndex = 0;
+
+        slides.forEach((slide) => {
+            const mainNumberStr = `${slideIndex + 1}`;
+
+            if (slide.subslides && Array.isArray(slide.subslides)) {
+                // Outer vertical section container gets Level 1 title from first subslide or slide title
+                // Η πρώτη κατακόρυφη διαφάνεια λαμβάνει αρίθμηση 1ου επιπέδου (π.χ. 2.)
+                slide.subslides.forEach((subslide, subIndex) => {
+                    const rawTitle = subslide.title || slide.title || 'Διαφάνεια';
+
+                    if (subIndex === 0) {
+                        // First subslide acts as the Level 1 Section Header (e.g. 2.)
+                        // Η πρώτη υποδιαφάνεια λειτουργεί ως τίτλος 1ου επιπέδου (π.χ. 2.)
+                        const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, subIndex, drawer, 1);
+                        weeksList.appendChild(li);
+                    } else {
+                        // Subsequent subslides act as Level 2 items (e.g. 2.1, 2.2)
+                        // Οι επόμενες υποδιαφάνειες λειτουργούν ως στοιχεία 2ου επιπέδου (π.χ. 2.1, 2.2)
+                        const subNumberStr = `${slideIndex + 1}.${subIndex}`;
+                        const li = createSlideLinkItem(subNumberStr, rawTitle, slideIndex, subIndex, drawer, 2);
+                        weeksList.appendChild(li);
+                    }
+                });
+            } else {
+                // Standard horizontal slide (Level 1 item, e.g., 1., 3.)
+                // Απλή οριζόντια διαφάνεια (Στοιχείο 1ου επιπέδου, π.χ. 1., 3.)
+                const rawTitle = slide.title || 'Διαφάνεια';
+                const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, null, drawer, 1);
+                weeksList.appendChild(li);
+            }
+            slideIndex++;
         });
     }
+}
+
+/**
+ * Helper function to create a structured slide navigation link inside the drawer
+ * Βοηθητική συνάρτηση δημιουργίας δομημένου συνδέσμου πλοήγησης διαφάνειας στο drawer
+ */
+function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, drawer, level) {
+    const li = document.createElement('li');
+    li.classList.add('slide-nav-item', `level-${level}`);
+
+    const a = document.createElement('a');
+    a.href = '#';
+
+    // Separate number and title text into individual elements for flexbox alignment
+    // Διαχωρισμός αριθμού και τίτλου σε ξεχωριστά στοιχεία για σωστή στοίχιση μέσω flexbox
+    const numSpan = document.createElement('span');
+    numSpan.classList.add('slide-num');
+    numSpan.textContent = `${numberStr}.`;
+
+    const titleSpan = document.createElement('span');
+    titleSpan.classList.add('slide-title-text');
+    titleSpan.textContent = titleText;
+
+    a.appendChild(numSpan);
+    a.appendChild(titleSpan);
+
+    a.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof Reveal !== 'undefined') {
+            if (vIndex !== null) {
+                Reveal.slide(hIndex, vIndex);
+            } else {
+                Reveal.slide(hIndex);
+            }
+        }
+        if (drawer) drawer.classList.remove('open');
+    });
+
+    li.appendChild(a);
+    return li;
 }
 
 /**

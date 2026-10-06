@@ -89,6 +89,7 @@ function buildSlides(slides) {
     });
 }
 
+
 /**
  * Create an individual <section> element based on slide type
  * Δημιουργία μεμονωμένου <section> ανάλογα με τον τύπο της διαφάνειας
@@ -184,8 +185,18 @@ function createSlideElement(slide) {
         section.appendChild(linksContainer);
     }
 
+    // Attach speaker notes for Reveal.js (accessible via 'S' key)
+    // Προσθήκη σημειώσεων ομιλητή για το Reveal.js (προσβάσιμες με το πλήκτρο 'S')
+    if (slide.notes) {
+        const notesEl = document.createElement('aside');
+        notesEl.classList.add('notes');
+        notesEl.textContent = slide.notes;
+        section.appendChild(notesEl);
+    }
+
     return section;
 }
+
 
 /**
  * Initialize Reveal.js instance and syntax highlighter

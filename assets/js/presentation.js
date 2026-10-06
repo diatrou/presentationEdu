@@ -1,98 +1,287 @@
-// Dynamic Presentation Loader
-// Δυναμική Φόρτωση Παρουσίασης
+// Initialization upon DOM content load
+// Αρχικοποίηση κατά τη φόρτωση του περιεχομένου του DOM
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Get 'week' parameter from URL query string
-  // 1. Λήψη της παραμέτρου 'week' από το URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const weekId = parseInt(urlParams.get('week'), 10) || 1;
+    // Read URL query parameter (?week=X)
+    // Ανάγνωση παραμέτρου URL (?week=X)
+    const urlParams = new URLSearchParams(window.location.search);
+    const weekParam = parseInt(urlParams.get('week')) || 1;
 
-  // 2. Validate configuration and target week
-  // 2. Έλεγχος ρυθμίσεων και εβδομάδας στόχου
-  if (!window.CONFIG || !window.CONFIG.weeks) {
-    console.error('Configuration missing or invalid.');
-    showError('Το αρχείο ρυθμίσεων λείπει ή είναι μη έγκυρο.');
-    return;
-  }
+    // Locate week configuration object from config.js
+    // Εντοπισμός στοιχείου ρυθμίσεων εβδομάδας από το config.js
+    const config = window.CONFIG || {};
+    const weekDataConfig = config.weeks ? config.weeks.find(w => w.id === weekParam) : null;
+    const dataFilePath = weekDataConfig ? weekDataConfig.file : `assets/data/week0${weekParam}.js`;
 
-  const weekConfig = window.CONFIG.weeks.find(w => w.id === weekId);
-  if (!weekConfig) {
-    showError(`Η εβδομάδα ${weekId} δεν βρέθηκε!`);
-    return;
-  }
+    // Dynamically load the weekly JS data file
+    // Δυναμική φόρτωση του JS αρχείου δεδομένων της εβδομάδας
+    loadScript(dataFilePath)
+        .then(() => {
+            const currentData = window.CURRENT_WEEK_DATA;
+            if (!currentData) {
+                console.error("Δεν βρέθηκαν δεδομένα για την εβδομάδα / No data found for week:", weekParam);
+                return;
+            }
 
-  // 3. Update Page Title
-  // 3. Ενημέρωση Τίτλου Σελίδας
-  document.title = `Εβδομάδα ${weekConfig.id}: ${weekConfig.title}`;
+            // Update title heading in the control bar
+            // Ενημέρωση τίτλου στην μπάρα ελέγχου
+            const weekTitleEl = document.getElementById('week-title');
+            if (weekTitleEl) {
+                weekTitleEl.textContent = `Εβδομάδα ${currentData.week}: ${currentData.title}`;
+            }
 
-  // 4. Dynamic Script Injection for Week Data
-  // 4. Δυναμική Φόρτωση Αρχείου Δεδομένων Εβδομάδας
-  const script = document.createElement('script');
-  script.src = weekConfig.file;
+            // Dynamically create slide elements in the DOM
+            // Δημιουργία των διαφανειών στο DOM
+            buildSlides(currentData.slides);
 
-  script.onload = () => {
-    if (window.CURRENT_WEEK_DATA && window.CURRENT_WEEK_DATA.slides) {
-      renderSlides(window.CURRENT_WEEK_DATA.slides);
-      
-      // Initialize Reveal.js Framework
-      // Αρχικοποίηση του Reveal.js
-      Reveal.initialize({
-        controls: true,
-        progress: true,
-        center: true,
-        hash: true,
-        slideNumber: 'c/t'
-      });
-    } else {
-      showError('Τα δεδομένα της παρουσίασης δεν είναι στη σωστή μορφή.');
-    }
-  };
+            // Initialize Reveal.js presentation engine and Highlight.js
+            // Αρχικοποίηση Reveal.js & Highlight.js
+            initReveal();
 
-  script.onerror = () => {
-    script.remove();
-    showError(`Αποτυχία φόρτωσης του αρχείου: ${weekConfig.file}`);
-  };
-
-  document.head.appendChild(script);
+            // Initialize UI controls (Side Drawer, Link Toggle)
+            // Αρχικοποίηση στοιχείων UI (Drawer, Toggle Συνδέσμων)
+            initUIControls();
+        })
+        .catch(err => {
+            console.error("Σφάλμα κατά τη φόρτωση των δεδομένων της εβδομάδας / Error loading week data:", err);
+        });
 });
 
-// Render Slides HTML Structure (Supports Horizontal & Vertical Slides)
-// Δημιουργία HTML Δομής Διαφανειών (Υποστηρίζει Οριζόντιες & Κατακόρυφες Διαφάνειες)
-function renderSlides(slides) {
-  const container = document.getElementById('slidesContainer');
-  
-  container.innerHTML = slides.map(slide => {
-    // Αν η διαφάνεια περιέχει υπο-διαφάνειες (vertical slides)
-    if (slide.subslides && Array.isArray(slide.subslides)) {
-      const innerSlides = slide.subslides.map(sub => `
-        <section>
-          ${sub.title ? `<h2>${sub.title}</h2>` : ''}
-          ${sub.content || ''}
-        </section>
-      `).join('');
-      return `<section>${innerSlides}</section>`;
-    }
-
-    // Απλή οριζόντια διαφάνεια
-    return `
-      <section>
-        ${slide.title ? `<h2>${slide.title}</h2>` : ''}
-        ${slide.content || ''}
-      </section>
-    `;
-  }).join('');
+/**
+ * Helper function for dynamic script loading
+ * Βοηθητική συνάρτηση δυναμικής φόρτωσης script
+ */
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Αποτυχία φόρτωσης script / Failed to load script: ${src}`));
+        document.head.appendChild(script);
+    });
 }
 
-// Render Error Message
-// Εμφάνιση Μηνύματος Σφάλματος
-function showError(message) {
-  const container = document.getElementById('slidesContainer');
-  if (container) {
-    container.innerHTML = `
-      <section>
-        <h2>Σφάλμα</h2>
-        <p>${message}</p>
-        <p><a href="index.html">Επιστροφή στον Πίνακα Ελέγχου</a></p>
-      </section>
-    `;
-  }
+/**
+ * Construct slides inside the DOM
+ * Κατασκευή DOM διαφανειών
+ */
+function buildSlides(slides) {
+    const container = document.getElementById('slidesContainer');
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear initial container content / Καθαρισμός αρχικού περιεχομένου
+
+    slides.forEach(slide => {
+        if (slide.subslides && Array.isArray(slide.subslides)) {
+            // Create vertical subslides container
+            // Δημιουργία κατακόρυφων διαφανειών (Vertical Subslides)
+            const parentSection = document.createElement('section');
+            slide.subslides.forEach(subslide => {
+                const childSection = createSlideElement(subslide);
+                parentSection.appendChild(childSection);
+            });
+            container.appendChild(parentSection);
+        } else {
+            // Create standard horizontal slide
+            // Απλή οριζόντια διαφάνεια
+            const section = createSlideElement(slide);
+            container.appendChild(section);
+        }
+    });
+}
+
+/**
+ * Create an individual <section> element based on slide type
+ * Δημιουργία μεμονωμένου <section> ανάλογα με τον τύπο της διαφάνειας
+ */
+function createSlideElement(slide) {
+    const section = document.createElement('section');
+
+    switch (slide.type) {
+        case 'intro':
+            section.innerHTML = `
+                <h2>${slide.title || ''}</h2>
+                ${slide.subtitle ? `<h3>${slide.subtitle}</h3>` : ''}
+            `;
+            break;
+
+        case 'theory':
+            let bulletsHtml = '';
+            if (slide.bullets && slide.bullets.length > 0) {
+                bulletsHtml = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
+            }
+            section.innerHTML = `
+                <h3>${slide.title || ''}</h3>
+                ${bulletsHtml}
+                ${slide.content || ''}
+            `;
+            break;
+
+        case 'code':
+            section.innerHTML = `
+                <h3>${slide.title || ''}</h3>
+                <pre><code class="language-${slide.language || 'javascript'}">${escapeHtml(slide.codeSnippet || '')}</code></pre>
+                ${slide.explanation ? `<p><small>${slide.explanation}</small></p>` : ''}
+            `;
+            break;
+
+        case 'lab':
+            let stepsHtml = '';
+            if (slide.steps && slide.steps.length > 0) {
+                stepsHtml = `<ol>${slide.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+            }
+            section.innerHTML = `
+                <h3>${slide.title || ''}</h3>
+                ${stepsHtml}
+            `;
+            break;
+
+        case 'summary':
+            let summaryBullets = '';
+            if (slide.bullets && slide.bullets.length > 0) {
+                summaryBullets = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
+            }
+            section.innerHTML = `
+                <h3>${slide.title || ''}</h3>
+                ${summaryBullets}
+            `;
+            break;
+
+        default:
+            // Default generic slide template supporting raw HTML
+            // Προεπιλεγμένη/Generic διαφάνεια (υποστηρίζει και απευθείας HTML content)
+            section.innerHTML = `
+                ${slide.title ? `<h3>${slide.title}</h3>` : ''}
+                ${slide.content || ''}
+            `;
+            break;
+    }
+
+    // Attach optional image element
+    // Προσθήκη εικόνας αν υπάρχει
+    if (slide.image) {
+        const imgEl = document.createElement('img');
+        imgEl.src = slide.image;
+        imgEl.alt = slide.title || 'Slide Image';
+        imgEl.classList.add('slide-image');
+        section.appendChild(imgEl);
+    }
+
+    // Attach optional hyperlink elements
+    // Προσθήκη υπερσυνδέσμων (links) αν υπάρχουν
+    if (slide.links && slide.links.length > 0) {
+        const linksContainer = document.createElement('div');
+        linksContainer.classList.add('slide-links-container', 'hidden-links');
+        
+        slide.links.forEach(link => {
+            const a = document.createElement('a');
+            a.href = link.url;
+            a.textContent = link.text;
+            a.target = '_blank';
+            a.classList.add('slide-link');
+            linksContainer.appendChild(a);
+        });
+        
+        section.appendChild(linksContainer);
+    }
+
+    return section;
+}
+
+/**
+ * Initialize Reveal.js instance and syntax highlighter
+ * Αρχικοποίηση Reveal.js
+ */
+function initReveal() {
+    if (typeof Reveal !== 'undefined') {
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            center: true,
+            hash: true,
+            slideNumber: 'c/t'
+        }).then(() => {
+            // Apply syntax highlighting using Highlight.js
+            // Αρχικοποίηση Highlight.js για τον κώδικα
+            if (typeof hljs !== 'undefined') {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        });
+
+        // Reset hyperlink visibility upon slide change
+        // Επαναφορά απόκρυψης συνδέσμων σε κάθε αλλαγή διαφάνειας
+        Reveal.on('slidechanged', () => {
+            const toggleCheckbox = document.getElementById('link-toggle-checkbox');
+            if (toggleCheckbox && !toggleCheckbox.checked) {
+                document.querySelectorAll('.slide-links-container').forEach(el => {
+                    el.classList.add('hidden-links');
+                });
+            }
+        });
+    }
+}
+
+/**
+ * Initialize UI control listeners and drawer content
+ * Αρχικοποίηση στοιχείων UI (Drawer & Toggle Συνδέσμων)
+ */
+function initUIControls() {
+    // 1. Hyperlink visibility toggle
+    // 1. Toggle Συνδέσμων
+    const toggleCheckbox = document.getElementById('link-toggle-checkbox');
+    if (toggleCheckbox) {
+        toggleCheckbox.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            document.querySelectorAll('.slide-links-container').forEach(el => {
+                if (isChecked) {
+                    el.classList.remove('hidden-links');
+                } else {
+                    el.classList.add('hidden-links');
+                }
+            });
+        });
+    }
+
+    // 2. Navigation Side Drawer controls
+    // 2. Πλευρικό Μενού (Side Drawer)
+    const drawer = document.getElementById('side-drawer');
+    const openBtn = document.getElementById('drawer-toggle-btn');
+    const closeBtn = document.getElementById('drawer-close-btn');
+    const weeksList = document.getElementById('weeks-list');
+
+    if (openBtn && drawer) {
+        openBtn.addEventListener('click', () => drawer.classList.add('open'));
+    }
+
+    if (closeBtn && drawer) {
+        closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+    }
+
+    // Populate drawer weekly navigation menu
+    // Γέμισμα λίστας εβδομάδων στο Drawer
+    if (weeksList && window.CONFIG && window.CONFIG.weeks) {
+        weeksList.innerHTML = '';
+        window.CONFIG.weeks.forEach(w => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `presentation.html?week=${w.id}`;
+            a.textContent = `Εβδομάδα ${w.id}: ${w.title}`;
+            li.appendChild(a);
+            weeksList.appendChild(li);
+        });
+    }
+}
+
+/**
+ * Escape special HTML characters for code snippets
+ * Βοηθητική συνάρτηση escape HTML για ασφαλή προβολή κώδικα
+ */
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

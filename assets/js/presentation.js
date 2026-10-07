@@ -10,7 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Εντοπισμός στοιχείου ρυθμίσεων εβδομάδας από το config.js
     const config = window.CONFIG || {};
     const weekDataConfig = config.weeks ? config.weeks.find(w => w.id === weekParam) : null;
-    const dataFilePath = weekDataConfig ? weekDataConfig.file : `assets/data/week${weekParam < 10 ? '0' + weekParam : weekParam}.js`;
+    
+    // Fallback path construction matching exact assets/data/weekXX.js structure
+    // Κατασκευή διαδρομής με βάση το config.js ή τη δομή assets/data/weekXX.js
+    const formattedWeekNum = weekParam < 10 ? `0${weekParam}` : `${weekParam}`;
+    const dataFilePath = (weekDataConfig && weekDataConfig.file) ? weekDataConfig.file : `assets/data/week${formattedWeekNum}.js`;
 
     // Dynamically load the weekly JS data file
     // Δυναμική φόρτωση του JS αρχείου δεδομένων της εβδομάδας
@@ -429,18 +433,21 @@ function initScheduleTimer() {
             const startTotal = startH * 60 + startM;
             const endTotal = endH * 60 + endM;
 
+            // Retrieve label or name from schedule object
+            const periodName = item.label || item.name || `${item.start} - ${item.end}`;
+
             if (currentMinutes >= startTotal && currentMinutes < endTotal) {
-                activePeriod = item;
+                activePeriod = { ...item, periodName };
                 break;
             } else if (currentMinutes < startTotal) {
                 if (!nextPeriod || startTotal < (nextPeriod.startH * 60 + nextPeriod.startM)) {
-                    nextPeriod = { ...item, startTotal, startH, startM };
+                    nextPeriod = { ...item, periodName, startTotal, startH, startM };
                 }
             }
         }
 
         if (activePeriod) {
-            timerEl.textContent = `${activePeriod.name}`;
+            timerEl.textContent = `${activePeriod.periodName}`;
             timerEl.title = `Τρέχουσα ώρα: ${activePeriod.start} - ${activePeriod.end}`;
         } else if (nextPeriod) {
             const targetSeconds = nextPeriod.startTotal * 60;
@@ -452,7 +459,7 @@ function initScheduleTimer() {
 
             const formattedTime = `${String(remMinutes).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
             timerEl.textContent = `Έναρξη σε: ${formattedTime}`;
-            timerEl.title = `Επόμενη ώρα (${nextPeriod.name}) στις ${nextPeriod.start}`;
+            timerEl.title = `Επόμενη ώρα (${nextPeriod.periodName}) στις ${nextPeriod.start}`;
         } else {
             timerEl.textContent = "Εκτός Ωραρίου";
             timerEl.title = "Δεν υπάρχει άλλη προγραμματισμένη ώρα για σήμερα";

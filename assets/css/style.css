@@ -1,11 +1,36 @@
-/* Base Layout Settings */
-/* Βασικές Ρυθμίσεις Διάταξης */
+/* ==========================================================================
+   CSS Variables & Base Layout Settings
+   Μεταβλητές CSS & Βασικές Ρυθμίσεις Διάταξης
+   ========================================================================== */
+:root {
+  --bg-main: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-dark: #1e293b;
+  --bg-darker: #0f172a;
+  --text-main: #334155;
+  --text-muted: #94a3b8;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --accent: #38bdf8;
+  --success: #10b981;
+  --border-color: #e2e8f0;
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #f1f5f9;
-  color: #334155;
+  background-color: var(--bg-main);
+  color: var(--text-main);
   margin: 0;
   padding: 0;
+}
+
+/* Accessibility Focus Outline / Στυλ Εστίασης Προσβασιμότητας */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .dashboard-container {
@@ -14,10 +39,9 @@ body {
   padding: 20px;
 }
 
-/* Header Styles */
-/* Στυλ Κεφαλίδας */
+/* Header Styles / Στυλ Κεφαλίδας */
 .dashboard-header {
-  background: #1e293b;
+  background: var(--bg-dark);
   color: #ffffff;
   padding: 24px;
   border-radius: 8px;
@@ -31,11 +55,10 @@ body {
 
 .dashboard-header p {
   margin: 0;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
-/* Grid Layout */
-/* Διάταξη Πλέγματος */
+/* Grid Layout / Διάταξη Πλέγματος */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -48,10 +71,9 @@ body {
   }
 }
 
-/* Cards & Sections */
-/* Κάρτες & Ενότητες */
+/* Cards & Sections / Κάρτες & Ενότητες */
 .card {
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -62,12 +84,11 @@ body {
   margin-top: 0;
   font-size: 1.2rem;
   color: #0f172a;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 8px;
 }
 
-/* Schedule List */
-/* Λίστα Προγράμματος */
+/* Schedule List / Λίστα Προγράμματος */
 .schedule-list {
   list-style: none;
   padding: 0;
@@ -78,7 +99,7 @@ body {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--bg-main);
 }
 
 .schedule-list li.break {
@@ -86,8 +107,7 @@ body {
   font-style: italic;
 }
 
-/* Modules Grid */
-/* Πλέγμα Ενοτήτων */
+/* Modules Grid / Πλέγμα Ενοτήτων */
 .weeks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -95,22 +115,22 @@ body {
 }
 
 .week-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 16px;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  display: block;
 }
 
 .week-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border-color: #2563eb;
+  border-color: var(--primary);
 }
 
-/* Forms & Admin Panel Styles */
-/* Στυλ Φορμών & Πίνακα Διαχείρισης */
+/* Forms & Admin Panel Styles / Στυλ Φορμών & Πίνακα Διαχείρισης */
 .form-group {
   margin-bottom: 15px;
 }
@@ -146,10 +166,9 @@ body {
   flex: 1;
 }
 
-/* Buttons */
-/* Κουμπιά */
+/* Buttons / Κουμπιά */
 button, .btn {
-  background: #2563eb;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 8px 14px;
@@ -160,11 +179,11 @@ button, .btn {
 }
 
 button:hover, .btn:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 .btn-success {
-  background: #10b981;
+  background: var(--success);
 }
 
 .btn-success:hover {
@@ -180,10 +199,9 @@ button:hover, .btn:hover {
   background: #b91c1c;
 }
 
-/* Code Output Area */
-/* Περιοχή Εξόδου Κώδικα */
+/* Code Output Area / Περιοχή Εξόδου Κώδικα */
 pre {
-  background: #0f172a;
+  background: var(--bg-darker);
   color: #f8fafc;
   padding: 15px;
   border-radius: 6px;
@@ -202,15 +220,14 @@ pre {
    Στυλ Περιβάλλοντος Παρουσίασης
    ========================================================================== */
 
-/* Top Control Bar */
-/* Μπάρα Ελέγχου στο Πάνω Μέρος */
+/* Top Control Bar / Μπάρα Ελέγχου στο Πάνω Μέρος */
 .control-bar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 50px;
-  background-color: #1e293b;
+  background-color: var(--bg-dark);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -224,20 +241,30 @@ pre {
 .week-title {
   font-weight: 600;
   font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
 }
 
 .schedule-timer {
   font-family: monospace;
-  background-color: #0f172a;
+  background-color: var(--bg-darker);
   padding: 4px 10px;
   border-radius: 4px;
   border: 1px solid #334155;
-  color: #38bdf8;
+  color: var(--accent);
   font-weight: bold;
+  font-size: 0.9rem;
 }
 
-/* Link Toggle Switch */
-/* Διακόπτης Εμφάνισης/Απόκρυψης Συνδέσμων */
+@media (max-width: 600px) {
+  .week-title {
+    display: none;
+  }
+}
+
+/* Link Toggle Switch / Διακόπτης Εμφάνισης/Απόκρυψης Συνδέσμων */
 .toggle-switch {
   display: flex;
   align-items: center;
@@ -272,7 +299,7 @@ pre {
 }
 
 .toggle-switch input:checked + .slider {
-  background-color: #10b981;
+  background-color: var(--success);
 }
 
 .toggle-switch input:checked + .slider::before {
@@ -283,15 +310,14 @@ pre {
   font-size: 0.85rem;
 }
 
-/* Side Drawer Navigation */
-/* Πλευρικό Συρόμενο Μενού */
+/* Side Drawer Navigation / Πλευρικό Συρόμενο Μενού */
 .side-drawer {
   position: fixed;
   top: 0;
   left: 0;
   width: 300px;
   height: 100%;
-  background-color: #0f172a;
+  background-color: var(--bg-darker);
   color: #ffffff;
   z-index: 2000;
   transform: translateX(-100%);
@@ -299,6 +325,7 @@ pre {
   padding: 20px;
   box-sizing: border-box;
   box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  overflow-y: auto; /* Enable scrolling for long content */
 }
 
 .side-drawer.open {
@@ -332,16 +359,15 @@ pre {
   display: block;
   padding: 8px;
   border-radius: 4px;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
 .weeks-list a:hover {
-  background-color: #1e293b;
-  color: #38bdf8;
+  background-color: var(--bg-dark);
+  color: var(--accent);
 }
 
-/* Link Visibility & Custom Slide Styles */
-/* Ορατότητα Συνδέσμων & Ειδικά Στυλ Διαφανειών */
+/* Link Visibility & Custom Slide Styles / Ορατότητα Συνδέσμων & Ειδικά Στυλ Διαφανειών */
 .hidden-links {
   display: none !important;
 }
@@ -356,7 +382,7 @@ pre {
 .slide-link {
   display: inline-block;
   margin: 5px 10px;
-  color: #2563eb;
+  color: var(--primary);
   font-size: 0.9rem;
 }
 
@@ -366,16 +392,13 @@ pre {
   margin-top: 15px;
 }
 
-/* Adjust Reveal.js layout for Top Bar */
-/* Προσαρμογή Reveal.js για τη σταθερή μπάρα ελέγχου */
+/* Adjust Reveal.js layout for Top Bar / Προσαρμογή Reveal.js για τη σταθερή μπάρα ελέγχου */
 .reveal {
   margin-top: 50px;
   height: calc(100vh - 50px) !important;
 }
 
-/* Drawer Slide Navigation Item Styles */
-/* Στυλ Στοιχείων Πλοήγησης Διαφανειών στο Drawer */
-
+/* Drawer Slide Navigation Item Styles / Στυλ Στοιχείων Πλοήγησης Διαφανειών στο Drawer */
 .weeks-list li.slide-nav-item a {
   display: flex;
   align-items: baseline;
@@ -389,42 +412,37 @@ pre {
 }
 
 .weeks-list li.slide-nav-item a:hover {
-  background-color: #1e293b;
-  color: #38bdf8;
+  background-color: var(--bg-dark);
+  color: var(--accent);
 }
 
-/* Slide Number (Fixed width to handle multi-line alignment) */
-/* Αριθμός Διαφάνειας (Σταθερό πλάτος για σωστή στοίχιση επόμενων γραμμών) */
 .slide-num {
   font-weight: bold;
-  color: #38bdf8;
+  color: var(--accent);
   flex-shrink: 0;
   min-width: 28px;
   text-align: right;
 }
 
-/* Slide Title Text */
-/* Κείμενο Τίτλου Διαφάνειας */
 .slide-title-text {
   flex-grow: 1;
 }
 
-/* Level 1 (Main Slides) - Aligned to the far left */
-/* 1ο Επίπεδο (Κύριες Διαφάνειες) - Πλήρης στοίχιση αριστερά */
+/* Level 1 (Main Slides) */
 .weeks-list li.level-1 {
   margin-top: 6px;
   margin-bottom: 2px;
-  padding-left: 0; /* Ευθυγράμμιση με τον τίτλο της ενότητας */
+  padding-left: 0;
 }
 
 .weeks-list li.level-1 .slide-num {
   font-size: 0.95rem;
   font-weight: bold;
-  color: #38bdf8;
+  color: var(--accent);
   flex-shrink: 0;
   min-width: auto;
   margin-right: 6px;
-  text-align: left; /* Στοίχιση αριθμού αριστερά */
+  text-align: left;
 }
 
 .weeks-list li.level-1 .slide-title-text {
@@ -432,17 +450,16 @@ pre {
   font-weight: 600;
 }
 
-/* Level 2 (Subslides) - Indented & Smaller Font */
-/* 2ο Επίπεδο (Υποδιαφάνειες) - Εσοχή προς τα δεξιά & Μικρότερη Γραμματοσειρά */
+/* Level 2 (Subslides) */
 .weeks-list li.level-2 {
-  padding-left: 16px; /* Εσοχή δεξιώτερα για τα υποθέματα */
+  padding-left: 16px;
   margin-bottom: 2px;
 }
 
 .weeks-list li.level-2 .slide-num {
   font-size: 0.82rem;
   font-weight: bold;
-  color: #94a3b8;
+  color: var(--text-muted);
   flex-shrink: 0;
   min-width: auto;
   margin-right: 6px;

@@ -12,6 +12,9 @@
   
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Local SheetJS Library for offline .xlsx file parsing -->
+  <script src="assets/libs/xlsx.full.min.js"></script>
   
 </head>
 <body>
@@ -59,17 +62,16 @@
 
   <div class="card">
     <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
+    
+    <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
+    <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+      <button type="button" onclick="exportScheduleCSV()">Εξαγωγή Προγράμματος (.csv)</button>
+      <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
+      <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="importScheduleFile(event)">
+    </div>
+
     <div id="scheduleContainer">
-      <div class="row schedule-item">
-        <select class="sched-type">
-          <option value="lecture" selected>Διδακτική Ώρα</option>
-          <option value="break">Διάλειμμα</option>
-        </select>
-        <input type="text" class="sched-label" placeholder="Ετικέτα (π.χ. 1η Διδακτική Ώρα)" value="1η Διδακτική Ώρα">
-        <input type="text" class="sched-start" placeholder="Έναρξη (15:00)" value="15:00">
-        <input type="text" class="sched-end" placeholder="Λήξη (15:45)" value="15:45">
-        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
-      </div>
+      <!-- Δυναμικές γραμμές -->
     </div>
     <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
   </div>
@@ -345,6 +347,160 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showNotification('Το αρχείο λήφθηκε επιτυχώς!');
+    }
+
+    // --- Εξαγωγή Ωρολογίου Προγράμματος σε CSV ---
+    function exportScheduleCSV() {
+      const rows = document.querySelectorAll('.schedule-item');
+      if (rows.length === 0) {
+        showNotification('Δεν υπάρχουν στοιχεία στο πρόγραμμα για εξαγωγή!');
+        return;
+      }
+
+      let csvContent = '\uFEFFΌνομα,Έναρξη,Λήξη\n';
+
+      rows.forEach(row => {
+        const label = row.querySelector('.sched-label').value.replace(/"/g, '""');
+        const start = row.querySelector('.sched-start').value;
+        const end = row.querySelector('.sched-end').value;
+
+        csvContent += `"${label}",${start},${end}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'schedule.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showNotification('Το ωρολόγιο πρόγραμμα εξήχθη επιτυχώς!');
+    }
+
+    // --- Εισαγωγή Ωρολογίου Προγράμματος (.xlsx & .csv) με Αυτόματο Υπολογισμό Διαλειμμάτων ---
+    function importScheduleFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const fileName = file.name.toLowerCase();
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        let rawLectures = [];
+
+        if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+          if (typeof XLSX === 'undefined') {
+            showNotification('Σφάλμα: Δεν βρέθηκε η τοπική βιβλιοθήκη assets/libs/xlsx.full.min.js');
+            event.target.value = '';
+            return;
+          }
+
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          jsonData.forEach((row, index) => {
+            if (!row || row.length < 3) return;
+            
+            const label = String(row[0] || '').trim();
+            const start = String(row[1] || '').trim();
+            const end = String(row[2] || '').trim();
+
+            if (index === 0 && (label.includes('Όνομα') || label.includes('Name'))) return;
+
+            const isBreak = label.toLowerCase().includes('διάλειμμα') || label.toLowerCase().includes('break');
+            if (!isBreak && start && end) {
+              rawLectures.push({ label, start, end });
+            }
+          });
+        } else {
+          const text = e.target.result;
+          const lines = text.split(/\r\n|\n/);
+
+          lines.forEach((line, index) => {
+            if (!line.trim()) return;
+            if (index === 0 && (line.includes('Όνομα') || line.includes('Name'))) return;
+
+            const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+            if (parts.length >= 3) {
+              const label = parts[0];
+              const start = parts[1];
+              const end = parts[2];
+              
+              const isBreak = label.toLowerCase().includes('διάλειμμα') || label.toLowerCase().includes('break');
+              if (!isBreak && start && end) {
+                rawLectures.push({ label, start, end });
+              }
+            }
+          });
+        }
+
+        if (rawLectures.length === 0) {
+          showNotification('Δεν βρέθηκαν έγκυρες εγγραφές διδακτικών ωρών!');
+          event.target.value = '';
+          return;
+        }
+
+        // 1. Ταξινόμηση διδακτικών ωρών βάσει ώρας έναρξης
+        rawLectures.sort((a, b) => a.start.localeCompare(b.start));
+
+        // 2. Αυτόματος υπολογισμός και παρεμβολή διαλειμμάτων
+        const fullSchedule = [];
+        rawLectures.forEach((lec, idx) => {
+          fullSchedule.push({
+            type: 'lecture',
+            label: lec.label,
+            start: lec.start,
+            end: lec.end
+          });
+
+          if (idx < rawLectures.length - 1) {
+            const nextLec = rawLectures[idx + 1];
+            if (lec.end < nextLec.start) {
+              fullSchedule.push({
+                type: 'break',
+                label: 'Διάλειμμα',
+                start: lec.end,
+                end: nextLec.start
+              });
+            }
+          }
+        });
+
+        // 3. Ενημέρωση της φόρμας
+        const container = document.getElementById('scheduleContainer');
+        container.innerHTML = '';
+
+        fullSchedule.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'row schedule-item';
+          div.innerHTML = `
+            <select class="sched-type">
+              <option value="lecture" ${item.type === 'lecture' ? 'selected' : ''}>Διδακτική Ώρα</option>
+              <option value="break" ${item.type === 'break' ? 'selected' : ''}>Διάλειμμα</option>
+            </select>
+            <input type="text" class="sched-label" placeholder="Ετικέτα" value="${item.label}">
+            <input type="text" class="sched-start" placeholder="Έναρξη" value="${item.start}">
+            <input type="text" class="sched-end" placeholder="Λήξη" value="${item.end}">
+            <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+          `;
+          container.appendChild(div);
+        });
+
+        event.target.value = '';
+        showNotification(`Εισήχθησαν ${rawLectures.length} διδακτικές ώρες με αυτόματο υπολογισμό διαλειμμάτων!`);
+      };
+
+      if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsText(file, 'UTF-8');
+      }
     }
   </script>
 

@@ -228,7 +228,7 @@
       });
     }
 
-    // --- Παραγωγή Config ---
+    // --- Παραγωγή Config με Δίγλωσση Τεκμηρίωση ---
     function generateConfig() {
       const scheduleItems = [];
       const weekItems = [];
@@ -250,47 +250,68 @@
         });
       });
 
-      const configText = `window.CONFIG = {
-  // General institution & course information
-  institution: "${document.getElementById('institution').value}",
-  semester: "${document.getElementById('semester').value}",
-  department: "${document.getElementById('department').value}",
-  courseTitle: "${document.getElementById('courseTitle').value}",
-  
-  // Instructor details
-  instructors: [
-    {
-      name: "${document.getElementById('instructorName').value}",
-      email: "${document.getElementById('instructorEmail').value}",
-      role: "${document.getElementById('instructorRole').value}"
-    }
-  ],
+      const configText = `window.CONFIG = Object.freeze({
+      // General institution & course information
+      // Γενικές πληροφορίες ιδρύματος & μαθήματος
+      institution: "${document.getElementById('institution').value}",
+      semester: "${document.getElementById('semester').value}",
+      department: "${document.getElementById('department').value}",
+      courseTitle: "${document.getElementById('courseTitle').value}",
+      
+      // Instructor details
+      // Στοιχεία Εκπαιδευτών
+      instructors: [
+        {
+          name: "${document.getElementById('instructorName').value}",
+          email: "${document.getElementById('instructorEmail').value}",
+          role: "${document.getElementById('instructorRole').value}"
+        }
+      ],
 
-  // Schedule timeline (Lecture hours & breaks)
-  schedule: ${JSON.stringify(scheduleItems, null, 4)},
+      // Schedule timeline (Lecture hours & breaks)
+      // Ωρολόγιο πρόγραμμα (Διδακτικές ώρες & διαλείμματα)
+      schedule: ${JSON.stringify(scheduleItems, null, 4)},
 
-  // List of weekly modules
-  weeks: ${JSON.stringify(weekItems, null, 4)}
-};`;
+      // List of weekly modules
+      // Λίστα εβδομαδιαίων ενοτήτων
+      weeks: ${JSON.stringify(weekItems, null, 4)}
+    });`;
 
       document.getElementById('outputCode').textContent = configText;
+      showNotification('Ο κώδικας παράχθηκε με επιτυχία!');
+    }
+
+    // --- Διακριτικό Ενημερωτικό Μήνυμα (Notification Toast) ---
+    function showNotification(msg) {
+      let toast = document.getElementById('toastNotification');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastNotification';
+        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; transition: opacity 0.3s ease; font-weight: 500;';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 3000);
     }
 
     // --- Εξαγωγή & Αποθήκευση ---
     function copyCode() {
       const code = document.getElementById('outputCode').textContent;
       if (!code || code.startsWith('//')) {
-        alert('Παρακαλώ παράγετε πρώτα τον κώδικα!');
+        showNotification('Παρακαλώ παράγετε πρώτα τον κώδικα!');
         return;
       }
       navigator.clipboard.writeText(code);
-      alert('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
+      showNotification('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
     }
 
     async function saveConfigFile() {
       const code = document.getElementById('outputCode').textContent;
       if (!code || code.startsWith('//')) {
-        alert('Παρακαλώ παράγετε πρώτα τον κώδικα!');
+        showNotification('Παρακαλώ παράγετε πρώτα τον κώδικα!');
         return;
       }
 
@@ -306,7 +327,7 @@
           const writable = await handle.createWritable();
           await writable.write(code);
           await writable.close();
-          alert('Το αρχείο αποθηκεύτηκε επιτυχώς!');
+          showNotification('Το αρχείο αποθηκεύτηκε επιτυχώς!');
           return;
         } catch (err) {
           if (err.name === 'AbortError') return;
@@ -323,6 +344,7 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      showNotification('Το αρχείο λήφθηκε επιτυχώς!');
     }
   </script>
 

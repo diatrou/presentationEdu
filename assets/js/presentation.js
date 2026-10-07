@@ -10,9 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Εντοπισμός στοιχείου ρυθμίσεων εβδομάδας από το config.js
     const config = window.CONFIG || {};
     const weekDataConfig = config.weeks ? config.weeks.find(w => w.id === weekParam) : null;
-    
-    // Exact path construction from OLD working version
-    // Ακριβής κατασκευή διαδρομής από την παλιά λειτουργική έκδοση
     const formattedNum = weekParam < 10 ? `0${weekParam}` : `${weekParam}`;
     const dataFilePath = weekDataConfig ? weekDataConfig.file : `assets/data/week${formattedNum}.js`;
 
@@ -158,64 +155,10 @@ function createSlideElement(slide) {
                 ${slide.content || ''}
             `;
             break;
-     switch (slide.type) {
-        case 'intro':
-            section.innerHTML = `
-                <h2>${slide.title || ''}</h2>
-                ${slide.subtitle ? `<h3>${slide.subtitle}</h3>` : ''}
-            `;
-            break;
-
-        case 'theory':
-            let bulletsHtml = '';
-            if (slide.bullets && slide.bullets.length > 0) {
-                bulletsHtml = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${bulletsHtml}
-                ${slide.content || ''}
-            `;
-            break;
-
-        case 'code':
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                <pre><code class="language-${slide.language || 'javascript'}">${escapeHtml(slide.codeSnippet || '')}</code></pre>
-                ${slide.explanation ? `<p><small>${slide.explanation}</small></p>` : ''}
-            `;
-            break;
-
-        case 'lab':
-            let stepsHtml = '';
-            if (slide.steps && slide.steps.length > 0) {
-                stepsHtml = `<ol>${slide.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${stepsHtml}
-            `;
-            break;
-
-        case 'summary':
-            let summaryBullets = '';
-            if (slide.bullets && slide.bullets.length > 0) {
-                summaryBullets = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${summaryBullets}
-            `;
-            break;
-
-        default:
-            section.innerHTML = `
-                ${slide.title ? `<h3>${slide.title}</h3>` : ''}
-                ${slide.content || ''}
-            `;
-            break;
     }
 
+    // Attach optional image element
+    // Προσθήκη εικόνας αν υπάρχει
     if (slide.image) {
         const imgEl = document.createElement('img');
         imgEl.src = slide.image;
@@ -224,6 +167,8 @@ function createSlideElement(slide) {
         section.appendChild(imgEl);
     }
 
+    // Attach optional hyperlink elements
+    // Προσθήκη υπερσυνδέσμων (links) αν υπάρχουν
     if (slide.links && slide.links.length > 0) {
         const linksContainer = document.createElement('div');
         linksContainer.classList.add('slide-links-container', 'hidden-links');
@@ -240,6 +185,8 @@ function createSlideElement(slide) {
         section.appendChild(linksContainer);
     }
 
+    // Attach speaker notes for Reveal.js (accessible via 'S' key)
+    // Προσθήκη σημειώσεων ομιλητή για το Reveal.js (προσβάσιμες με το πλήκτρο 'S')
     if (slide.notes) {
         const notesEl = document.createElement('aside');
         notesEl.classList.add('notes');
@@ -263,6 +210,8 @@ function initReveal() {
             hash: true,
             slideNumber: 'c/t'
         }).then(() => {
+            // Apply syntax highlighting using Highlight.js
+            // Αρχικοποίηση Highlight.js για τον κώδικα
             if (typeof hljs !== 'undefined') {
                 document.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
@@ -270,6 +219,8 @@ function initReveal() {
             }
         });
 
+        // Reset hyperlink visibility upon slide change
+        // Επαναφορά απόκρυψης συνδέσμων σε κάθε αλλαγή διαφάνειας
         Reveal.on('slidechanged', () => {
             const toggleCheckbox = document.getElementById('link-toggle-checkbox');
             if (toggleCheckbox && !toggleCheckbox.checked) {
@@ -286,6 +237,8 @@ function initReveal() {
  * Αρχικοποίηση στοιχείων UI (Drawer & Toggle Συνδέσμων)
  */
 function initUIControls() {
+    // 1. Hyperlink visibility toggle
+    // 1. Toggle Συνδέσμων
     const toggleCheckbox = document.getElementById('link-toggle-checkbox');
     if (toggleCheckbox) {
         toggleCheckbox.addEventListener('change', (e) => {
@@ -300,6 +253,8 @@ function initUIControls() {
         });
     }
 
+    // 2. Navigation Side Drawer controls
+    // 2. Πλευρικό Μενού (Side Drawer)
     const drawer = document.getElementById('side-drawer');
     const openBtn = document.getElementById('drawer-toggle-btn');
     const closeBtn = document.getElementById('drawer-close-btn');
@@ -313,9 +268,13 @@ function initUIControls() {
         closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
     }
 
+    // Populate drawer with Dashboard link, section header, and multi-level numbered slides
+    // Γέμισμα λίστας Drawer με σύνδεσμο Dashboard, τίτλο ενότητας και σωστή αρίθμηση επιπέδων
     if (weeksList && window.CURRENT_WEEK_DATA) {
         weeksList.innerHTML = '';
 
+        // Add link for returning to Dashboard
+        // Προσθήκη συνδέσμου επιστροφής στον Πίνακα Ελέγχου
         const dashLi = document.createElement('li');
         dashLi.classList.add('dashboard-link-item');
         const dashA = document.createElement('a');
@@ -324,15 +283,21 @@ function initUIControls() {
         dashLi.appendChild(dashA);
         weeksList.appendChild(dashLi);
 
+        // Add separator
+        // Προσθήκη διαχωριστικού
         const hrLi = document.createElement('li');
         hrLi.innerHTML = '<hr style="border: 0; border-top: 1px solid #334155; margin: 12px 0;">';
         weeksList.appendChild(hrLi);
 
+        // Add drawer section title for current week slides
+        // Προσθήκη τίτλου ενότητας διαφανειών εβδομάδας
         const titleLi = document.createElement('li');
         titleLi.innerHTML = `<span style="font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Διαφάνειες Εβδομάδας ${window.CURRENT_WEEK_DATA.week || ''}</span>`;
         titleLi.style.marginBottom = '8px';
         weeksList.appendChild(titleLi);
 
+        // Populate numbered slide titles
+        // Γέμισμα αριθμημένων τίτλων
         const slides = window.CURRENT_WEEK_DATA.slides || [];
         let slideIndex = 0;
 
@@ -362,6 +327,10 @@ function initUIControls() {
     }
 }
 
+/**
+ * Helper function to create a structured slide navigation link inside the drawer
+ * Βοηθητική συνάρτηση δημιουργίας δομημένου συνδέσμου πλοήγησης διαφάνειας στο drawer
+ */
 function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, drawer, level) {
     const li = document.createElement('li');
     li.classList.add('slide-nav-item', `level-${level}`);
@@ -396,6 +365,10 @@ function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, drawer, level
     return li;
 }
 
+/**
+ * Escape special HTML characters for code snippets
+ * Βοηθητική συνάρτηση escape HTML για ασφαλή προβολή κώδικα
+ */
 function escapeHtml(text) {
     return text
         .replace(/&/g, "&amp;")

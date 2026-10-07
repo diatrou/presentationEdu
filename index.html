@@ -3,41 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Πίνακας Ελέγχου και Εβδομαδιαίο Υλικό Μαθήματος">
   <title>Πίνακας Ελέγχου Μαθήματος</title>
+  
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="icon" type="image/png" href="assets/images/favicon.png">
   <link rel="shortcut icon" href="assets/images/favicon.ico">
 </head>
 <body>
 
-  <!-- Main Container -->
-  <!-- Κεντρικό Πλαίσιο -->
+  <!-- Main Container / Κεντρικό Πλαίσιο -->
   <div class="dashboard-container">
     
-    <!-- Header Section -->
-    <!-- Ενότητα Κεφαλίδας -->
+    <!-- Header Section / Ενότητα Κεφαλίδας -->
     <header class="dashboard-header">
       <h1 id="courseTitle">Προετοιμασία Μαθήματος...</h1>
       <p id="courseMeta"></p>
     </header>
 
-    <!-- Main Content Layout -->
-    <!-- Διάταξη Κύριου Περιεχομένου -->
+    <!-- Main Content Layout / Διάταξη Κύριου Περιεχομένου -->
     <main class="dashboard-grid">
       
       <!-- Sidebar / Course Info & Schedule -->
       <!-- Πλευρική Στήλη / Πληροφορίες & Πρόγραμμα -->
-      <aside class="sidebar">
+      <aside class="sidebar" aria-label="Πληροφορίες Μαθήματος και Πρόγραμμα">
         
-        <!-- Instructors Card -->
-        <!-- Κάρτα Εκπαιδευτών -->
+        <!-- Instructors Card / Κάρτα Εκπαιδευτών -->
         <section class="card">
           <h2>Εκπαιδευτής</h2>
           <div id="instructorInfo"></div>
         </section>
 
-        <!-- Schedule Card -->
-        <!-- Κάρτα Ωρολογίου Προγράμματος -->
+        <!-- Schedule Card / Κάρτα Ωρολογίου Προγράμματος -->
         <section class="card">
           <h2>Ωρολόγιο Πρόγραμμα</h2>
           <ul id="scheduleList" class="schedule-list"></ul>
@@ -45,9 +42,8 @@
 
       </aside>
 
-      <!-- Weekly Modules Section -->
-      <!-- Ενότητα Εβδομαδιαίων Υποενοτήτων -->
-      <section class="modules-section card">
+      <!-- Weekly Modules Section / Ενότητα Εβδομαδιαίων Υποενοτήτων -->
+      <section class="modules-section card" aria-label="Εβδομαδιαίες Ενότητες">
         <h2>Εβδομαδιαίες Ενότητες</h2>
         <div id="weeksGrid" class="weeks-grid"><!-- Θα παραχθούν δυναμικά μέσω JavaScript --></div>
       </section>
@@ -55,10 +51,9 @@
     </main>
   </div>
 
-  <!-- Load Config & Main Script -->
-  <!-- Φόρτωση Ρυθμίσεων & Κύριου Σεναρίου -->
-  <script src="config.js"></script>
-  <script src="assets/js/app.js"></script>
+  <!-- Load Config & Main Script / Φόρτωση Ρυθμίσεων & Κύριου Σεναρίου -->
+  <script src="config.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
   
 </body>
 </html>

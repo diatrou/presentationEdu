@@ -16,6 +16,9 @@
 </head>
 <body>
 
+  <!-- Load Configuration File / Φόρτωση Αρχείου Ρυθμίσεων -->
+  <script src="config.js"></script>
+
   <h1>Παραγωγή Κώδικα Ρυθμίσεων `config.js`</h1>
 
   <div class="card">
@@ -96,6 +99,74 @@
   </div>
 
   <script>
+
+    // Load configuration values from window.CONFIG
+    // Φόρτωση τιμών από το υφιστάμενο window.CONFIG
+    function loadExistingConfig() {
+      if (typeof window.CONFIG === 'undefined') return;
+
+      const cfg = window.CONFIG;
+
+      // 1. Γενικές Πληροφορίες
+      if (cfg.institution) document.getElementById('institution').value = cfg.institution;
+      if (cfg.semester) document.getElementById('semester').value = cfg.semester;
+      if (cfg.department) document.getElementById('department').value = cfg.department;
+      if (cfg.courseTitle) document.getElementById('courseTitle').value = cfg.courseTitle;
+
+      // 2. Στοιχεία Εκπαιδευτή (1ος Εκπαιδευτής)
+      if (cfg.instructors && cfg.instructors.length > 0) {
+        const inst = cfg.instructors[0];
+        if (inst.name) document.getElementById('instructorName').value = inst.name;
+        if (inst.email) document.getElementById('instructorEmail').value = inst.email;
+        if (inst.role) document.getElementById('instructorRole').value = inst.role;
+      }
+
+      // 3. Ωρολόγιο Πρόγραμμα
+      if (cfg.schedule && cfg.schedule.length > 0) {
+        const schedContainer = document.getElementById('scheduleContainer');
+        schedContainer.innerHTML = ''; // Καθαρισμός προκαθορισμένων γραμμών
+        
+        cfg.schedule.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'row schedule-item';
+          div.innerHTML = `
+            <select class="sched-type">
+              <option value="lecture" ${item.type === 'lecture' ? 'selected' : ''}>Διδακτική Ώρα</option>
+              <option value="break" ${item.type === 'break' ? 'selected' : ''}>Διάλειμμα</option>
+            </select>
+            <input type="text" class="sched-label" placeholder="Ετικέτα" value="${item.label || ''}">
+            <input type="text" class="sched-start" placeholder="Έναρξη" value="${item.start || ''}">
+            <input type="text" class="sched-end" placeholder="Λήξη" value="${item.end || ''}">
+            <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+          `;
+          schedContainer.appendChild(div);
+        });
+      }
+
+      // 4. Εβδομαδιαίες Ενότητες
+      if (cfg.weeks && cfg.weeks.length > 0) {
+        const weeksContainer = document.getElementById('weeksContainer');
+        weeksContainer.innerHTML = ''; // Καθαρισμός προκαθορισμένων γραμμών
+
+        cfg.weeks.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'row week-item';
+          div.innerHTML = `
+            <input type="number" class="week-id" placeholder="ΑΡ" value="${item.id}" style="width: 70px; flex: none;">
+            <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="${item.title || ''}">
+            <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="${item.file || ''}">
+            <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+          `;
+          weeksContainer.appendChild(div);
+        });
+      }
+    }
+
+    // Εκτέλεση κατά τη φόρτωση της σελίδας
+    document.addEventListener('DOMContentLoaded', loadExistingConfig);
+
+
+
     // --- Προσθήκη, Αφαίρεση & Αναρίθμηση Γραμμών ---
     function addScheduleRow() {
       const container = document.getElementById('scheduleContainer');

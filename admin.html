@@ -65,7 +65,7 @@
     
     <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
     <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-      <button type="button" onclick="exportScheduleCSV()">Εξαγωγή Προγράμματος (.csv)</button>
+      <button type="button" onclick="exportScheduleXLSX()">Εξαγωγή Προγράμματος (.xlsx)</button>
       <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
       <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="importScheduleFile(event)">
     </div>
@@ -349,35 +349,69 @@
       showNotification('Το αρχείο λήφθηκε επιτυχώς!');
     }
 
-    // --- Εξαγωγή Ωρολογίου Προγράμματος σε CSV ---
-    function exportScheduleCSV() {
+    // --- Εξαγωγή Ωρολογίου Προγράμματος σε αρχείο .xlsx (Excel) ---
+    async function exportScheduleXLSX() {
       const rows = document.querySelectorAll('.schedule-item');
       if (rows.length === 0) {
         showNotification('Δεν υπάρχουν στοιχεία στο πρόγραμμα για εξαγωγή!');
         return;
       }
 
-      let csvContent = '\uFEFFΌνομα,Έναρξη,Λήξη\n';
+      if (typeof XLSX === 'undefined') {
+        showNotification('Σφάλμα: Δεν βρέθηκε η τοπική βιβλιοθήκη assets/libs/xlsx.full.min.js');
+        return;
+      }
 
+      // 1. Προετοιμασία των δεδομένων με επικεφαλίδες
+      const data = [['Όνομα', 'Έναρξη', 'Λήξη']];
       rows.forEach(row => {
-        const label = row.querySelector('.sched-label').value.replace(/"/g, '""');
+        const label = row.querySelector('.sched-label').value;
         const start = row.querySelector('.sched-start').value;
         const end = row.querySelector('.sched-end').value;
-
-        csvContent += `"${label}",${start},${end}\n`;
+        data.push([label, start, end]);
       });
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      // 2. Δημιουργία Workbook και Worksheet μέσω της SheetJS
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Πρόγραμμα');
+
+      // 3. Δημιουργία ArrayBuffer του αρχείου .xlsx
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+      // 4. Δοκιμή παράθυρου "Αποθήκευση ως" (File System Access API)
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'schedule.xlsx',
+            types: [{
+              description: 'Excel Workbook',
+              accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] },
+            }],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(excelBuffer);
+          await writable.close();
+          showNotification('Το πρόγραμμα αποθηκεύτηκε επιτυχώς ως .xlsx!');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.warn('Μετάβαση σε λήψη αρχείου...', err);
+        }
+      }
+
+      // 5. Fallback: Άμεση λήψη αρχείου .xlsx
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'schedule.csv';
+      a.download = 'schedule.xlsx';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showNotification('Το ωρολόγιο πρόγραμμα εξήχθη επιτυχώς!');
+      showNotification('Το πρόγραμμα εξήχθη επιτυχώς ως .xlsx!');
     }
 
     // --- Εισαγωγή Ωρολογίου Προγράμματος (.xlsx & .csv) με Αυτόματο Υπολογισμό Διαλειμμάτων ---

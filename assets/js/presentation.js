@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Εντοπισμός στοιχείου ρυθμίσεων εβδομάδας από το config.js
     const config = window.CONFIG || {};
     const weekDataConfig = config.weeks ? config.weeks.find(w => w.id === weekParam) : null;
-    const dataFilePath = weekDataConfig ? weekDataConfig.file : `assets/data/week0${weekParam}.js`;
+    const dataFilePath = weekDataConfig ? weekDataConfig.file : `assets/data/week${weekParam < 10 ? '0' + weekParam : weekParam}.js`;
 
     // Dynamically load the weekly JS data file
     // Δυναμική φόρτωση του JS αρχείου δεδομένων της εβδομάδας
@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Initialize UI controls (Side Drawer, Link Toggle)
             // Αρχικοποίηση στοιχείων UI (Drawer, Toggle Συνδέσμων)
             initUIControls();
+
+            // Start class schedule and automated break/next-class timer
+            // Έναρξη ωρολογίου προγράμματος & αυτόματης αντίστροφης μέτρησης
+            initScheduleTimer();
         })
         .catch(err => {
             console.error("Σφάλμα κατά τη φόρτωση των δεδομένων της εβδομάδας / Error loading week data:", err);
@@ -89,7 +93,6 @@ function buildSlides(slides) {
     });
 }
 
-
 /**
  * Create an individual <section> element based on slide type
  * Δημιουργία μεμονωμένου <section> ανάλογα με τον τύπο της διαφάνειας
@@ -102,6 +105,7 @@ function createSlideElement(slide) {
             section.innerHTML = `
                 <h2>${slide.title || ''}</h2>
                 ${slide.subtitle ? `<h3>${slide.subtitle}</h3>` : ''}
+                ${slide.content || ''}
             `;
             break;
 
@@ -133,6 +137,28 @@ function createSlideElement(slide) {
             section.innerHTML = `
                 <h3>${slide.title || ''}</h3>
                 ${stepsHtml}
+                ${slide.content || ''}
+            `;
+            break;
+
+        case 'image':
+            let imagesHtml = '';
+            if (slide.images && Array.isArray(slide.images)) {
+                imagesHtml = `<div class="image-gallery ${slide.images.length === 2 ? 'two-images' : 'single-image'}">
+                    ${slide.images.map(img => `
+                        <div class="img-wrapper">
+                            <img src="${img.url \vert{}\vert{} img}" alt="${img.caption || slide.title || 'Slide Image'}" class="slide-image">
+                            ${img.caption ? `<p class="img-caption"><small>${img.caption}</small></p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>`;
+            } else if (slide.image) {
+                imagesHtml = `<img src="${slide.image}" alt="${slide.title || 'Slide Image'}" class="slide-image">`;
+            }
+            section.innerHTML = `
+                ${slide.title ? `<h3>${slide.title}</h3>` : ''}
+                ${imagesHtml}
+                ${slide.content ? `<div class="image-description">${slide.content}</div>` : ''}
             `;
             break;
 
@@ -144,6 +170,7 @@ function createSlideElement(slide) {
             section.innerHTML = `
                 <h3>${slide.title || ''}</h3>
                 ${summaryBullets}
+                ${slide.content || ''}
             `;
             break;
 
@@ -157,9 +184,9 @@ function createSlideElement(slide) {
             break;
     }
 
-    // Attach optional image element
-    // Προσθήκη εικόνας αν υπάρχει
-    if (slide.image) {
+    // Attach single image if specified and not handled by 'image' type
+    // Προσθήκη εικόνας αν υπάρχει και δεν έχει ήδη επεξεργαστεί από τύπο 'image'
+    if (slide.image && slide.type !== 'image') {
         const imgEl = document.createElement('img');
         imgEl.src = slide.image;
         imgEl.alt = slide.title || 'Slide Image';
@@ -197,7 +224,6 @@ function createSlideElement(slide) {
     return section;
 }
 
-
 /**
  * Initialize Reveal.js instance and syntax highlighter
  * Αρχικοποίηση Reveal.js
@@ -232,7 +258,6 @@ function initReveal() {
         });
     }
 }
-
 
 /**
  * Initialize UI control listeners and drawer content
@@ -271,12 +296,12 @@ function initUIControls() {
     }
 
     // Populate drawer with Dashboard link, section header, and multi-level numbered slides
-    // Γέμισμα λίστας Drawer με σύνδεσμο Dashboard (χωρίς εικονίδιο), τίτλο ενότητας και σωστή αρίθμηση επιπέδων
+    // Γέμισμα λίστας Drawer με σύνδεσμο Dashboard, τίτλο ενότητας και σωστή αρίθμηση επιπέδων
     if (weeksList && window.CURRENT_WEEK_DATA) {
         weeksList.innerHTML = '';
 
-        // Add link for returning to Dashboard (without icon)
-        // Προσθήκη συνδέσμου επιστροφής στον Πίνακα Ελέγχου (χωρίς εικονίδιο)
+        // Add link for returning to Dashboard
+        // Προσθήκη συνδέσμου επιστροφής στον Πίνακα Ελέγχου
         const dashLi = document.createElement('li');
         dashLi.classList.add('dashboard-link-item');
         const dashA = document.createElement('a');
@@ -307,27 +332,19 @@ function initUIControls() {
             const mainNumberStr = `${slideIndex + 1}`;
 
             if (slide.subslides && Array.isArray(slide.subslides)) {
-                // Outer vertical section container gets Level 1 title from first subslide or slide title
-                // Η πρώτη κατακόρυφη διαφάνεια λαμβάνει αρίθμηση 1ου επιπέδου (π.χ. 2.)
                 slide.subslides.forEach((subslide, subIndex) => {
                     const rawTitle = subslide.title || slide.title || 'Διαφάνεια';
 
                     if (subIndex === 0) {
-                        // First subslide acts as the Level 1 Section Header (e.g. 2.)
-                        // Η πρώτη υποδιαφάνεια λειτουργεί ως τίτλος 1ου επιπέδου (π.χ. 2.)
                         const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, subIndex, drawer, 1);
                         weeksList.appendChild(li);
                     } else {
-                        // Subsequent subslides act as Level 2 items (e.g. 2.1, 2.2)
-                        // Οι επόμενες υποδιαφάνειες λειτουργούν ως στοιχεία 2ου επιπέδου (π.χ. 2.1, 2.2)
                         const subNumberStr = `${slideIndex + 1}.${subIndex}`;
                         const li = createSlideLinkItem(subNumberStr, rawTitle, slideIndex, subIndex, drawer, 2);
                         weeksList.appendChild(li);
                     }
                 });
             } else {
-                // Standard horizontal slide (Level 1 item, e.g., 1., 3.)
-                // Απλή οριζόντια διαφάνεια (Στοιχείο 1ου επιπέδου, π.χ. 1., 3.)
                 const rawTitle = slide.title || 'Διαφάνεια';
                 const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, null, drawer, 1);
                 weeksList.appendChild(li);
@@ -348,8 +365,6 @@ function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, drawer, level
     const a = document.createElement('a');
     a.href = '#';
 
-    // Separate number and title text into individual elements for flexbox alignment
-    // Διαχωρισμός αριθμού και τίτλου σε ξεχωριστά στοιχεία για σωστή στοίχιση μέσω flexbox
     const numSpan = document.createElement('span');
     numSpan.classList.add('slide-num');
     numSpan.textContent = `${numberStr}.`;
@@ -375,6 +390,77 @@ function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, drawer, level
 
     li.appendChild(a);
     return li;
+}
+
+/**
+ * Smart schedule timer function calculating active class or countdown to next session
+ * Έξυπνος μηχανισμός υπολογισμού τρέχουσας διδακτικής ώρας ή αντίστροφης μέτρησης
+ */
+function initScheduleTimer() {
+    const timerEl = document.getElementById('schedule-timer');
+    if (!timerEl) return;
+
+    function updateTimer() {
+        const config = window.CONFIG || {};
+        const schedule = config.schedule || [];
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const currentSeconds = now.getSeconds();
+
+        // Check if schedule.js provides custom parsing logic
+        if (typeof window.getScheduleStatus === 'function') {
+            timerEl.textContent = window.getScheduleStatus(schedule, now);
+            return;
+        }
+
+        if (!schedule || schedule.length === 0) {
+            timerEl.textContent = "Χωρίς Πρόγραμμα";
+            return;
+        }
+
+        let activePeriod = null;
+        let nextPeriod = null;
+
+        for (let i = 0; i < schedule.length; i++) {
+            const item = schedule[i];
+            const [startH, startM] = item.start.split(':').map(Number);
+            const [endH, endM] = item.end.split(':').map(Number);
+
+            const startTotal = startH * 60 + startM;
+            const endTotal = endH * 60 + endM;
+
+            if (currentMinutes >= startTotal && currentMinutes < endTotal) {
+                activePeriod = item;
+                break;
+            } else if (currentMinutes < startTotal) {
+                if (!nextPeriod || startTotal < (nextPeriod.startH * 60 + nextPeriod.startM)) {
+                    nextPeriod = { ...item, startTotal, startH, startM };
+                }
+            }
+        }
+
+        if (activePeriod) {
+            timerEl.textContent = `${activePeriod.name}`;
+            timerEl.title = `Τρέχουσα ώρα: ${activePeriod.start} - ${activePeriod.end}`;
+        } else if (nextPeriod) {
+            const targetSeconds = nextPeriod.startTotal * 60;
+            const nowSeconds = currentMinutes * 60 + currentSeconds;
+            const diffSeconds = targetSeconds - nowSeconds;
+
+            const remMinutes = Math.floor(diffSeconds / 60);
+            const remSecs = diffSeconds % 60;
+
+            const formattedTime = `${String(remMinutes).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
+            timerEl.textContent = `Έναρξη σε: ${formattedTime}`;
+            timerEl.title = `Επόμενη ώρα (${nextPeriod.name}) στις ${nextPeriod.start}`;
+        } else {
+            timerEl.textContent = "Εκτός Ωραρίου";
+            timerEl.title = "Δεν υπάρχει άλλη προγραμματισμένη ώρα για σήμερα";
+        }
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
 }
 
 /**

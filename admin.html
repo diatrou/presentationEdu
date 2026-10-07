@@ -131,7 +131,34 @@
     }
 
     function removeRow(btn) {
-      btn.parentElement.remove();
+      const row = btn.parentElement;
+      const container = row.parentElement;
+      
+      // Αφαίρεση της γραμμής
+      row.remove();
+      
+      // Αν η διαγραφή έγινε στο πλαίσιο των εβδομάδων, επαναριθμούμε τις εναπομείνασες
+      if (container && container.id === 'weeksContainer') {
+        reindexWeeks();
+      }
+    }
+
+    function reindexWeeks() {
+      const rows = document.querySelectorAll('#weeksContainer .week-item');
+      rows.forEach((row, index) => {
+        const newNum = index + 1;
+        const padId = String(newNum).padStart(2, '0');
+        
+        // Ενημέρωση του πεδίου αριθμού εβδομάδας
+        const idInput = row.querySelector('.week-id');
+        if (idInput) idInput.value = newNum;
+        
+        // Ενημέρωση της διαδρομής αρχείου αν παραμένει στη default δομή
+        const fileInput = row.querySelector('.week-file');
+        if (fileInput && fileInput.value.includes('assets/data/week')) {
+          fileInput.value = `assets/data/week${padId}.js`;
+        }
+      });
     }
 
     // --- Παραγωγή Config ---

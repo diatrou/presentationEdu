@@ -60,8 +60,9 @@ function initScheduleTimer() {
     if (!timerElement) return;
 
     function updateTimer() {
+        // Safe access to schedule config / Ασφαλής πρόσβαση στις ρυθμίσεις προγράμματος
         const config = window.CONFIG || {};
-        const schedule = config.schedule;
+        const schedule = config.schedule || window.SCHEDULE;
 
         if (!schedule || !schedule.slots || schedule.slots.length === 0) {
             timerElement.textContent = "--:--";
@@ -103,8 +104,15 @@ function initScheduleTimer() {
         }
     }
 
+    // Initial check / Αρχικός έλεγχος
     updateTimer();
-    setInterval(updateTimer, 30000); // Ενημέρωση κάθε 30 δευτερόλεπτα
+
+    // Retry after 500ms in case config loads with slight delay
+    // Επαναδοκιμή μετά από 500ms σε περίπτωση καθυστέρησης φόρτωσης του config
+    setTimeout(updateTimer, 500);
+
+    // Periodic update every 30 seconds / Περιοδική ενημέρωση κάθε 30 δευτερόλεπτα
+    setInterval(updateTimer, 30000);
 }
 
 /**

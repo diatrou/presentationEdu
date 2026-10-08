@@ -169,7 +169,7 @@
 
 
 
-    // --- Προσθήκη, Αφαίρεση & Αναρίθμηση Γραμμών ---
+	// --- Προσθήκη, Αφαίρεση & Αναρίθμηση Γραμμών ---
     function addScheduleRow() {
       const container = document.getElementById('scheduleContainer');
       const div = document.createElement('div');
@@ -204,11 +204,18 @@
     }
 
     function removeRow(btn) {
-      const row = btn.parentElement;
+      if (!btn) return;
+
+      // Εύρεση της αμέσως προηγούμενης γραμμής (week-item ή schedule-item)
+      const row = btn.closest('.row') || btn.parentElement;
+      if (!row) return;
+
       const container = row.parentElement;
-      
+
+      // Αφαίρεση της συγκεκριμένης γραμμής
       row.remove();
-      
+
+      // Αν η διαγραφή έγινε μέσα στο πλαίσιο των εβδομάδων, εκτελείται επαναρίθμηση
       if (container && container.id === 'weeksContainer') {
         reindexWeeks();
       }
@@ -220,9 +227,11 @@
         const newNum = index + 1;
         const padId = String(newNum).padStart(2, '0');
         
+        // Ενημέρωση αριθμού εβδομάδας
         const idInput = row.querySelector('.week-id');
         if (idInput) idInput.value = newNum;
         
+        // Ενημέρωση διαδρομής αρχείου weekXX.js
         const fileInput = row.querySelector('.week-file');
         if (fileInput && fileInput.value.includes('assets/data/week')) {
           fileInput.value = `assets/data/week${padId}.js`;

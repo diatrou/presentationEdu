@@ -137,7 +137,7 @@ select:focus-visible {
 
 /* Forms & Admin Panel Styles / Στυλ Φορμών & Πίνακα Διαχείρισης */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 .form-group label {
@@ -160,6 +160,12 @@ select:focus-visible {
   gap: 10px;
   margin-bottom: 10px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.row .form-group {
+  flex: 1; /* Προεπιλογή: Ισόποση κατανομή για τα wrappers πεδίων / Default equal flex */
 }
 
 .row input, 
@@ -171,29 +177,48 @@ select:focus-visible {
 }
 
 /* Admin Specific Field Widths / Ειδικές Αναλογίες Πλάτους Πεδίων Διαχείρισης */
-.week-id {
-  width: 70px;
-  flex: none !important;
+
+/* 1. Εβδομαδιαίες Ενότητες (3 πεδία + κουμπί) / Weekly Modules Row */
+.row.week-item input.week-id {
+  width: 45px !important;
+  flex: 0 0 45px !important; /* Σταθερό στενό πλάτος για Α/Α / Fixed narrow width */
 }
 
-.week-title {
-  flex: 3 !important;
+.row.week-item input.week-title {
+  flex: 4 !important; /* Αυξημένο πλάτος για τον τίτλο / Expanded title width */
 }
 
-.week-file {
-  flex: 2 !important;
+.row.week-item input.week-file {
+  width: 160px !important;
+  flex: 0 0 160px !important; /* Περιορισμένο πλάτος για τη διαδρομή αρχείου / Compact fixed path width */
 }
 
-.sched-name {
-  flex: 2 !important;
+/* 2. Ωρολόγιο Πρόγραμμα (4 πεδία + κουμπί) / Schedule Row Fields */
+
+/* 1ο Πεδίο: Πτυσσόμενο μενού Τύπου / Schedule Type Dropdown */
+#scheduleContainer .row select.sched-type {
+  width: 145px !important;
+  flex: 0 0 145px !important;
 }
 
-.sched-time {
-  flex: 1 !important;
+/* 2ο Πεδίο: Όνομα ώρας/διαλείμματος / Name field (απορροφά τον υπόλοιπο ελεύθερο χώρο) */
+#scheduleContainer .row input.sched-label {
+  flex: 1 1 auto !important;
+  width: auto !important;
 }
 
-.sched-type {
-  flex: 1 !important;
+/* 3ο Πεδίο: Ώρα Έναρξης / Start Time field */
+#scheduleContainer .row input.sched-start {
+  width: 75px !important;
+  flex: 0 0 75px !important;
+  text-align: center;
+}
+
+/* 4ο Πεδίο: Ώρα Λήξης / End Time field */
+#scheduleContainer .row input.sched-end {
+  width: 75px !important;
+  flex: 0 0 75px !important;
+  text-align: center;
 }
 
 .is-hidden {

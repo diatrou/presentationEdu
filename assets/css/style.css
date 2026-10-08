@@ -522,3 +522,33 @@ pre {
   color: #cbd5e1;
   font-weight: normal;
 }
+
+/* ==========================================================================
+   Responsive Mobile Adjustments / Προσαρμογές για Οθόνες Κινητών
+   ========================================================================== */
+@media (max-width: 600px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* Επαναφορά σταθερών πλατών σε 100% για κινητές συσκευές */
+  .row.week-item input.week-id,
+  .row.week-item input.week-title,
+  .row.week-item input.week-file,
+  #scheduleContainer .row select.sched-type,
+  #scheduleContainer .row input.sched-label,
+  #scheduleContainer .row input.sched-start,
+  #scheduleContainer .row input.sched-end {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  /* Στοίχιση κουμπιού διαγραφής δεξιά σε οθόνες κινητών */
+  .row .btn-danger {
+    align-self: flex-end;
+    width: auto;
+  }
+}

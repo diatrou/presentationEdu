@@ -22,81 +22,86 @@
   <!-- Load Configuration File / Φόρτωση Αρχείου Ρυθμίσεων -->
   <script src="config.js"></script>
 
-  <h1>Παραγωγή Κώδικα Ρυθμίσεων `config.js`</h1>
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Παραγωγή Κώδικα Ρυθμίσεων <code>config.js</code></h1>
+      <p>Διαχείριση και παραγωγή αρχείου ρυθμίσεων για την εκπαιδευτική πλατφόρμα</p>
+    </header>
 
-  <div class="card">
-    <h2>Γενικές Πληροφορίες</h2>
-    <div class="form-group">
-      <label>Σχολή:</label>
-      <input type="text" id="institution" value="Σ.Α.Ε.Κ.">
-    </div>
-    <div class="form-group">
-      <label>Εξάμηνο:</label>
-      <input type="text" id="semester" value="Χειμερινό 2026Β">
-    </div>
-    <div class="form-group">
-      <label>Ειδικότητα:</label>
-      <input type="text" id="department" value="Τεχνικός Εφαρμογών Πληροφορικής (Πολυμέσα / Web Designer-Developer / Video Games)">
-    </div>
-    <div class="form-group">
-      <label>Τίτλος Μαθήματος:</label>
-      <input type="text" id="courseTitle" value="Εργαλεία Ανάπτυξης Εφαρμογών Διαδικτύου">
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Στοιχεία Εκπαιδευτή</h2>
-    <div class="form-group">
-      <label>Όνομα:</label>
-      <input type="text" id="instructorName" value="Δημήτριος Ιατρού">
-    </div>
-    <div class="form-group">
-      <label>Email:</label>
-      <input type="email" id="instructorEmail" value="iatroud@gmail.com">
-    </div>
-    <div class="form-group">
-      <label>Ρόλος:</label>
-      <input type="text" id="instructorRole" value="Εκπαιδευτής">
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
-    
-    <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
-    <div class="actions">
-      <button type="button" onclick="exportScheduleXLSX()">Εξαγωγή Προγράμματος (.xlsx)</button>
-      <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
-      <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" class="is-hidden" onchange="importScheduleFile(event)">
-    </div>
-
-    <div id="scheduleContainer">
-      <!-- Δυναμικές γραμμές -->
-    </div>
-    <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
-  </div>
-
-  <div class="card">
-    <h2>Εβδομαδιαίες Ενότητες Μαθήματος</h2>
-    <div id="weeksContainer">
-      <div class="row week-item">
-        <input type="number" class="week-id" placeholder="ΑΡ" value="1">
-        <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο">
-        <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week01.js">
-        <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+    <div class="card">
+      <h2>Γενικές Πληροφορίες</h2>
+      <div class="form-group">
+        <label>Σχολή:</label>
+        <input type="text" id="institution" value="Σ.Α.Ε.Κ.">
+      </div>
+      <div class="form-group">
+        <label>Εξάμηνο:</label>
+        <input type="text" id="semester" value="Χειμερινό 2026Β">
+      </div>
+      <div class="form-group">
+        <label>Ειδικότητα:</label>
+        <input type="text" id="department" value="Τεχνικός Εφαρμογών Πληροφορικής (Πολυμέσα / Web Designer-Developer / Video Games)">
+      </div>
+      <div class="form-group">
+        <label>Τίτλος Μαθήματος:</label>
+        <input type="text" id="courseTitle" value="Εργαλεία Ανάπτυξης Εφαρμογών Διαδικτύου">
       </div>
     </div>
-    <button type="button" onclick="addWeekRow()">+ Προσθήκη Εβδομάδας</button>
-  </div>
 
-  <button type="button" class="btn-primary-full" onclick="generateConfig()">Παραγωγή Κώδικα `config.js`</button>
+    <div class="card">
+      <h2>Στοιχεία Εκπαιδευτή</h2>
+      <div class="form-group">
+        <label>Όνομα:</label>
+        <input type="text" id="instructorName" value="Δημήτριος Ιατρού">
+      </div>
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="email" id="instructorEmail" value="iatroud@gmail.com">
+      </div>
+      <div class="form-group">
+        <label>Ρόλος:</label>
+        <input type="text" id="instructorRole" value="Εκπαιδευτής">
+      </div>
+    </div>
 
-  <div class="card card-stacked">
-    <h2>Παραγόμενος Κώδικας JavaScript</h2>
-    <pre id="outputCode">// Πατήστε το κουμπί παραπάνω για παραγωγή κώδικα...</pre>
-    <div class="actions">
-      <button type="button" onclick="copyCode()">Αντιγραφή Κώδικα</button>
-      <button type="button" class="btn-success" onclick="saveConfigFile()">Αποθήκευση ως `config.js`</button>
+    <div class="card">
+      <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
+      
+      <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
+      <div class="actions">
+        <button type="button" onclick="exportScheduleXLSX()">Εξαγωγή Προγράμματος (.xlsx)</button>
+        <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
+        <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" class="is-hidden" onchange="importScheduleFile(event)">
+      </div>
+
+      <div id="scheduleContainer">
+        <!-- Δυναμικές γραμμές -->
+      </div>
+      <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
+    </div>
+
+    <div class="card">
+      <h2>Εβδομαδιαίες Ενότητες Μαθήματος</h2>
+      <div id="weeksContainer">
+        <div class="row week-item">
+          <input type="number" class="week-id" placeholder="ΑΡ" value="1">
+          <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο">
+          <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week01.js">
+          <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+      <button type="button" onclick="addWeekRow()">+ Προσθήκη Εβδομάδας</button>
+    </div>
+
+    <button type="button" class="btn-primary-full" onclick="generateConfig()">Παραγωγή Κώδικα <code>config.js</code></button>
+
+    <div class="card card-stacked">
+      <h2>Παραγόμενος Κώδικας JavaScript</h2>
+      <pre id="outputCode">// Πατήστε το κουμπί παραπάνω για παραγωγή κώδικα...</pre>
+      <div class="actions">
+        <button type="button" onclick="copyCode()">Αντιγραφή Κώδικα</button>
+        <button type="button" class="btn-success" onclick="saveConfigFile()">Αποθήκευση ως <code>config.js</code></button>
+      </div>
     </div>
   </div>
 

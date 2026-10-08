@@ -471,3 +471,98 @@ pre {
   color: #cbd5e1;
   font-weight: normal;
 }
+
+/* ==========================================================================
+   Admin Dashboard Styles (`admin.html`)
+   ========================================================================== */
+
+/* Διάταξη Κάρτας & Φόρμας / Card Layout & Form Groups */
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Γραμμές Εισαγωγής Στοιχείων / Row Items */
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.row input[type="text"],
+.row input[type="number"],
+.row select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Κουμπιά & Ειδικές Κατηγορίες / Buttons & Special Classes */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-success {
+  background-color: #22c55e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-success:hover {
+  background-color: #16a34a;
+}
+
+/* Ειδοποίηση Toast / Toast Notification */
+#toastNotification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #22c55e;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+}

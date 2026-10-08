@@ -140,36 +140,39 @@ button:hover {
 
 /* Week Number Input (Compact 1-2 digit width) */
 /* Πεδίο Αριθμού Εβδομάδας (Συμπαγές πλάτος για 1-2 ψηφία) */
-.row input.week-id {
-  flex: 0 0 42px;
+.row input[type="number"].week-id {
+  flex: 0 0 50px !important;
+  width: 50px !important;
   padding: 8px 4px;
   text-align: center;
 }
 
 /* Flexible Titles and Labels (Expand to fill available space) */
 /* Ευέλικτοι Τίτλοι και Ετικέτες (Επεκτείνονται στον διαθέσιμο χώρο) */
-.row input.week-title,
-.row input.sched-label {
-  flex: 3 1 320px;
+.row input[type="text"].week-title,
+.row input[type="text"].sched-label {
+  flex: 3 1 320px !important;
 }
 
 /* File Path Input (Balanced relative width) */
 /* Πεδίο Διαδρομής Αρχείου (Ισορροπημένο σχετικό πλάτος) */
-.row input.week-file {
-  flex: 1 1 160px;
+.row input[type="text"].week-file {
+  flex: 1 1 160px !important;
 }
 
 /* Schedule Type Dropdown (Fixed option width) */
 /* Λίστα Επιλογής Τύπου Προγράμματος (Σταθερό πλάτος) */
 .row select.sched-type {
-  flex: 0 0 140px;
+  flex: 0 0 140px !important;
+  width: 140px !important;
 }
 
 /* Schedule Start and End Time Inputs (Compact width for "00:00" format) */
 /* Πεδία Ωρών Έναρξης και Λήξης (Συμπαγές πλάτος για μορφή "00:00") */
-.row input.sched-start,
-.row input.sched-end {
-  flex: 0 0 65px;
+.row input[type="text"].sched-start,
+.row input[type="text"].sched-end {
+  flex: 0 0 70px !important;
+  width: 70px !important;
   padding: 8px 4px;
   text-align: center;
 }

@@ -57,6 +57,19 @@ button:hover {
   background-color: #1d4ed8;
 }
 
+/* Base Input Controls & Select Dropdowns */
+/* Βασικά Πεδία Εισαγωγής & Λίστες Επιλογής */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
 /* ==========================================================================
    Helper Utilities
    Βοηθητικές Κλάσεις
@@ -122,15 +135,12 @@ button:hover {
   margin-bottom: 10px;
 }
 
-/* Base Form Controls inside Row */
-/* Βασικά Πεδία Εισαγωγής εντός Γραμμής */
+/* Base Form Controls inside Row Override Width */
+/* Παράκαμψη Πλάτους Πεδίων Εντός Γραμμής */
 .row input[type="text"],
 .row input[type="number"],
 .row select {
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
+  width: auto;
 }
 
 /* ==========================================================================

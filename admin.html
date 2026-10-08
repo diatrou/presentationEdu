@@ -64,10 +64,10 @@
     <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
     
     <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
-    <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+    <div class="actions">
       <button type="button" onclick="exportScheduleXLSX()">Εξαγωγή Προγράμματος (.xlsx)</button>
       <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
-      <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="importScheduleFile(event)">
+      <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" class="is-hidden" onchange="importScheduleFile(event)">
     </div>
 
     <div id="scheduleContainer">
@@ -80,7 +80,7 @@
     <h2>Εβδομαδιαίες Ενότητες Μαθήματος</h2>
     <div id="weeksContainer">
       <div class="row week-item">
-        <input type="number" class="week-id" placeholder="ΑΡ" value="1" style="width: 70px; flex: none;">
+        <input type="number" class="week-id" placeholder="ΑΡ" value="1">
         <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο">
         <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week01.js">
         <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
@@ -89,9 +89,9 @@
     <button type="button" onclick="addWeekRow()">+ Προσθήκη Εβδομάδας</button>
   </div>
 
-  <button type="button" onclick="generateConfig()" style="font-size: 16px; width: 100%;">Παραγωγή Κώδικα `config.js`</button>
+  <button type="button" class="btn-primary-full" onclick="generateConfig()">Παραγωγή Κώδικα `config.js`</button>
 
-  <div class="card" style="margin-top: 20px;">
+  <div class="card card-stacked">
     <h2>Παραγόμενος Κώδικας JavaScript</h2>
     <pre id="outputCode">// Πατήστε το κουμπί παραπάνω για παραγωγή κώδικα...</pre>
     <div class="actions">
@@ -154,7 +154,7 @@
           const div = document.createElement('div');
           div.className = 'row week-item';
           div.innerHTML = `
-            <input type="number" class="week-id" placeholder="ΑΡ" value="${item.id}" style="width: 70px; flex: none;">
+            <input type="number" class="week-id" placeholder="ΑΡ" value="${item.id}">
             <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="${item.title || ''}">
             <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="${item.file || ''}">
             <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
@@ -167,9 +167,7 @@
     // Εκτέλεση κατά τη φόρτωση της σελίδας
     document.addEventListener('DOMContentLoaded', loadExistingConfig);
 
-
-
-	// --- Προσθήκη, Αφαίρεση & Αναρίθμηση Γραμμών ---
+    // --- Προσθήκη, Αφαίρεση & Αναρίθμηση Γραμμών ---
     function addScheduleRow() {
       const container = document.getElementById('scheduleContainer');
       const div = document.createElement('div');
@@ -195,7 +193,7 @@
       const div = document.createElement('div');
       div.className = 'row week-item';
       div.innerHTML = `
-        <input type="number" class="week-id" placeholder="ΑΡ" value="${nextId}" style="width: 70px; flex: none;">
+        <input type="number" class="week-id" placeholder="ΑΡ" value="${nextId}">
         <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας">
         <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week${padId}.js">
         <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
@@ -298,7 +296,6 @@
       if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toastNotification';
-        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; transition: opacity 0.3s ease; font-weight: 500;';
         document.body.appendChild(toast);
       }
       toast.textContent = msg;

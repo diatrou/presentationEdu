@@ -22,6 +22,7 @@ body {
   color: var(--text-main);
   margin: 0;
   padding: 0;
+  /*overflow: hidden;  Αποτροπή γενικής κύλισης σελίδας */
 }
 
 /* Accessibility Focus Outline / Στυλ Εστίασης Προσβασιμότητας */
@@ -165,7 +166,7 @@ select:focus-visible {
 }
 
 .row .form-group {
-  flex: 1; /* Προεπιλογή: Ισόποση κατανομή για τα wrappers πεδίων / Default equal flex */
+  flex: 1;
 }
 
 .row input, 
@@ -177,44 +178,36 @@ select:focus-visible {
 }
 
 /* Admin Specific Field Widths / Ειδικές Αναλογίες Πλάτους Πεδίων Διαχείρισης */
-
-/* 1. Εβδομαδιαίες Ενότητες (3 πεδία + κουμπί) / Weekly Modules Row */
 .row.week-item input.week-id {
   width: 45px !important;
-  flex: 0 0 45px !important; /* Σταθερό στενό πλάτος για Α/Α / Fixed narrow width */
+  flex: 0 0 45px !important;
 }
 
 .row.week-item input.week-title {
-  flex: 4 !important; /* Αυξημένο πλάτος για τον τίτλο / Expanded title width */
+  flex: 4 !important;
 }
 
 .row.week-item input.week-file {
   width: 160px !important;
-  flex: 0 0 160px !important; /* Περιορισμένο πλάτος για τη διαδρομή αρχείου / Compact fixed path width */
+  flex: 0 0 160px !important;
 }
 
-/* 2. Ωρολόγιο Πρόγραμμα (4 πεδία + κουμπί) / Schedule Row Fields */
-
-/* 1ο Πεδίο: Πτυσσόμενο μενού Τύπου / Schedule Type Dropdown */
 #scheduleContainer .row select.sched-type {
   width: 145px !important;
   flex: 0 0 145px !important;
 }
 
-/* 2ο Πεδίο: Όνομα ώρας/διαλείμματος / Name field (απορροφά τον υπόλοιπο ελεύθερο χώρο) */
 #scheduleContainer .row input.sched-label {
   flex: 1 1 auto !important;
   width: auto !important;
 }
 
-/* 3ο Πεδίο: Ώρα Έναρξης / Start Time field */
 #scheduleContainer .row input.sched-start {
   width: 75px !important;
   flex: 0 0 75px !important;
   text-align: center;
 }
 
-/* 4ο Πεδίο: Ώρα Λήξης / End Time field */
 #scheduleContainer .row input.sched-end {
   width: 75px !important;
   flex: 0 0 75px !important;
@@ -443,10 +436,14 @@ pre {
   margin-top: 15px;
 }
 
-/* Adjust Reveal.js layout for Top Bar / Προσαρμογή Reveal.js για τη σταθερή μπάρα ελέγχου */
+/* Σωστή τοποθέτηση του Reveal.js κάτω από την επάνω μπάρα (50px) */
 .reveal {
-  margin-top: 50px;
+  position: fixed !important;
+  top: 50px !important;
+  left: 0 !important;
+  width: 100vw !important;
   height: calc(100vh - 50px) !important;
+  margin: 0 !important;
 }
 
 /* Drawer Slide Navigation Item Styles / Στυλ Στοιχείων Πλοήγησης Διαφανειών στο Drawer */
@@ -479,7 +476,6 @@ pre {
   flex-grow: 1;
 }
 
-/* Level 1 Main Slides / Κύριες Διαφάνειες Επιπέδου 1 */
 .weeks-list li.level-1 {
   margin-top: 6px;
   margin-bottom: 2px;
@@ -501,7 +497,6 @@ pre {
   font-weight: 600;
 }
 
-/* Level 2 Subslides / Υποδιαφάνειες Επιπέδου 2 */
 .weeks-list li.level-2 {
   padding-left: 16px;
   margin-bottom: 2px;
@@ -533,7 +528,6 @@ pre {
     gap: 8px;
   }
 
-  /* Επαναφορά σταθερών πλατών σε 100% για κινητές συσκευές */
   .row.week-item input.week-id,
   .row.week-item input.week-title,
   .row.week-item input.week-file,
@@ -546,9 +540,17 @@ pre {
     flex: 1 1 100% !important;
   }
 
-  /* Στοίχιση κουμπιού διαγραφής δεξιά σε οθόνες κινητών */
   .row .btn-danger {
     align-self: flex-end;
     width: auto;
   }
+}
+
+/* Προσαρμογή του container διαφανειών αποκλειστικά για τις HTML παρουσιάσεις */
+/* Customize slide container specifically for HTML presentations */
+body.html-mode .slides#slidesContainer {
+    width: 95% !important;
+    height: 160% !important;
+    inset: 55% auto auto 65% !important;
+    transform: translate(-65%, -50%) scale(0.69) !important;
 }

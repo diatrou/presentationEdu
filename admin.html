@@ -15,7 +15,6 @@
 
   <!-- Local SheetJS Library for offline .xlsx file parsing -->
   <script src="assets/libs/xlsx.full.min.js"></script>
-  
 </head>
 <body>
 
@@ -66,29 +65,19 @@
 
     <div class="card">
       <h2>Ωρολόγιο Πρόγραμμα (Διδακτικές Ώρες / Διαλείμματα)</h2>
-      
-      <!-- Κουμπιά Εισαγωγής & Εξαγωγής -->
       <div class="actions">
         <button type="button" onclick="exportScheduleXLSX()">Εξαγωγή Προγράμματος (.xlsx)</button>
         <button type="button" onclick="document.getElementById('scheduleFileInput').click()">Εισαγωγή Προγράμματος (.xlsx / .csv)</button>
         <input type="file" id="scheduleFileInput" accept=".xlsx, .xls, .csv, .txt" class="is-hidden" onchange="importScheduleFile(event)">
       </div>
-
-      <div id="scheduleContainer">
-        <!-- Δυναμικές γραμμές -->
-      </div>
+      <div id="scheduleContainer"></div>
       <button type="button" onclick="addScheduleRow()">+ Προσθήκη Ώρας / Διαλείμματος</button>
     </div>
 
     <div class="card">
       <h2>Εβδομαδιαίες Ενότητες Μαθήματος</h2>
       <div id="weeksContainer">
-        <div class="row week-item">
-          <input type="number" class="week-id" placeholder="ΑΡ" value="1">
-          <input type="text" class="week-title" placeholder="Τίτλος Εβδομάδας" value="Εισαγωγή στην Ανάπτυξη Εφαρμογών στο Διαδίκτυο">
-          <input type="text" class="week-file" placeholder="Διαδρομή Αρχείου" value="assets/data/week01.js">
-          <button type="button" class="btn-danger" onclick="removeRow(this)">X</button>
-        </div>
+        <!-- Δυναμικές γραμμές εβδομάδων -->
       </div>
       <button type="button" onclick="addWeekRow()">+ Προσθήκη Εβδομάδας</button>
     </div>
@@ -107,6 +96,5 @@
 
   <!-- Admin Dashboard External Logic -->
   <script src="assets/js/admin.js"></script>
-
 </body>
 </html>

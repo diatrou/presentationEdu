@@ -239,6 +239,7 @@ function generateConfig() {
 window.CONFIG = Object.freeze(${JSON.stringify(config, null, 2)});`;
 
   document.getElementById('outputCode').textContent = configText;
+  document.getElementById('outputCode').dataset.generated = 'true';
   showNotification('Ο κώδικας παράχθηκε με επιτυχία!');
 }
 
@@ -256,22 +257,54 @@ function showNotification(msg) {
   }, 3000);
 }
 
-function copyCode() {
-  const code = document.getElementById('outputCode').textContent;
-  if (!code || code.startsWith('//')) {
+function getGeneratedConfigCode() {
+  const output = document.getElementById('outputCode');
+  if (output.dataset.generated !== 'true') {
     showNotification('Παρακαλώ παράγετε πρώτα τον κώδικα!');
-    return;
+    return null;
   }
-  navigator.clipboard.writeText(code);
-  showNotification('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
+  return output.textContent;
+}
+
+function copyTextWithExecCommand(code) {
+  const textarea = document.createElement('textarea');
+  textarea.value = code;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  try {
+    textarea.select();
+    return document.execCommand('copy');
+  } finally {
+    textarea.remove();
+  }
+}
+
+async function copyCode() {
+  const code = getGeneratedConfigCode();
+  if (!code) return;
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (error) {
+        if (!copyTextWithExecCommand(code)) throw error;
+      }
+    } else if (!copyTextWithExecCommand(code)) {
+      throw new Error('Η αντιγραφή στο πρόχειρο δεν υποστηρίζεται από αυτόν τον browser.');
+    }
+    showNotification('Ο κώδικας αντιγράφηκε στο πρόχειρο!');
+  } catch (error) {
+    console.error('Αποτυχία αντιγραφής κώδικα:', error);
+    showNotification('Η αντιγραφή απέτυχε. Επιλέξτε και αντιγράψτε τον κώδικα χειροκίνητα.');
+  }
 }
 
 async function saveConfigFile() {
-  const code = document.getElementById('outputCode').textContent;
-  if (!code || code.startsWith('//')) {
-    showNotification('Παρακαλώ παράγετε πρώτα τον κώδικα!');
-    return;
-  }
+  const code = getGeneratedConfigCode();
+  if (!code) return;
 
   if ('showSaveFilePicker' in window) {
     try {

@@ -21,8 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         const formattedNum = weekParam < 10 ? `0${weekParam}` : `${weekParam}`;
         const dataFilePath = weekDataConfig.file || `assets/data/week${formattedNum}.js`;
+        const safeDataFilePath = resolveLocalAssetPath(dataFilePath);
+        if (!safeDataFilePath) {
+            console.error('Απορρίφθηκε μη τοπική διαδρομή αρχείου εβδομάδας:', dataFilePath);
+            return;
+        }
 
-        loadScript(dataFilePath)
+        loadScript(safeDataFilePath)
             .then(() => {
                 const currentData = window.CURRENT_WEEK_DATA;
                 if (!currentData) {
@@ -50,6 +55,20 @@ function loadScript(src) {
     });
 }
 
+function resolveLocalAssetPath(path) {
+    if (typeof path !== 'string' || !path.trim() || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(path)) {
+        return null;
+    }
+
+    const url = new URL(path, document.baseURI);
+    const baseUrl = new URL(document.baseURI);
+    const assetsUrl = new URL('assets/', document.baseURI);
+    if (url.origin !== baseUrl.origin || !['file:', 'http:', 'https:'].includes(url.protocol) ||
+        !url.pathname.startsWith(assetsUrl.pathname)) {
+        return null;
+    }
+    return url.href;
+}
 
 function setupHtmlPresentation(weekConfig) {
     // Προσθήκη ειδικής κλάσης στο body για τις HTML παρουσιάσεις
@@ -59,7 +78,13 @@ function setupHtmlPresentation(weekConfig) {
     const container = document.getElementById('slidesContainer');
     if (!container) return;
 
-    container.innerHTML = '';
+    const safeHtmlPath = resolveLocalAssetPath(weekConfig.file);
+    if (!safeHtmlPath) {
+        console.error('Απορρίφθηκε μη τοπική διαδρομή HTML εβδομάδας:', weekConfig.file);
+        return;
+    }
+
+    container.replaceChildren();
 
     const section = document.createElement('section');
     section.classList.add('html-embed-section');
@@ -69,7 +94,7 @@ function setupHtmlPresentation(weekConfig) {
     section.style.padding = '0';
 
     const iframe = document.createElement('iframe');
-    iframe.src = weekConfig.file;
+    iframe.src = safeHtmlPath;
     iframe.style.width = '100%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
@@ -99,7 +124,7 @@ function buildSlides(slides) {
     const container = document.getElementById('slidesContainer');
     if (!container) return;
 
-    container.innerHTML = '';
+    container.replaceChildren();
 
     slides.forEach(slide => {
         if (slide.subslides && Array.isArray(slide.subslides)) {
@@ -118,57 +143,58 @@ function buildSlides(slides) {
 
 function createSlideElement(slide) {
     const section = document.createElement('section');
+    const appendText = (tagName, text, parent = section) => {
+        const element = document.createElement(tagName);
+        element.textContent = text ?? '';
+        parent.appendChild(element);
+        return element;
+    };
+    const appendList = (tagName, items) => {
+        if (!Array.isArray(items) || items.length === 0) return;
+
+        const list = document.createElement(tagName);
+        items.forEach(item => appendText('li', item, list));
+        section.appendChild(list);
+    };
 
     switch (slide.type) {
         case 'intro':
-            section.innerHTML = `
-                <h2>${slide.title || ''}</h2>
-                ${slide.subtitle ? `<h3>${slide.subtitle}</h3>` : ''}
-            `;
+            appendText('h2', slide.title || '');
+            if (slide.subtitle) appendText('h3', slide.subtitle);
             break;
         case 'theory':
-            let bulletsHtml = '';
-            if (slide.bullets && slide.bullets.length > 0) {
-                bulletsHtml = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${bulletsHtml}
-                ${slide.content || ''}
-            `;
+            appendText('h3', slide.title || '');
+            appendList('ul', slide.bullets);
+            if (slide.content) appendText('p', slide.content);
             break;
         case 'code':
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                <pre><code class="language-${slide.language || 'javascript'}">${escapeHtml(slide.codeSnippet || '')}</code></pre>
-                ${slide.explanation ? `<p><small>${slide.explanation}</small></p>` : ''}
-            `;
+            appendText('h3', slide.title || '');
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            const language = typeof slide.language === 'string' && /^[a-z0-9_-]+$/i.test(slide.language)
+                ? slide.language
+                : 'javascript';
+            code.classList.add(`language-${language}`);
+            code.textContent = slide.codeSnippet || '';
+            pre.appendChild(code);
+            section.appendChild(pre);
+            if (slide.explanation) {
+                const explanation = document.createElement('p');
+                appendText('small', slide.explanation, explanation);
+                section.appendChild(explanation);
+            }
             break;
         case 'lab':
-            let stepsHtml = '';
-            if (slide.steps && slide.steps.length > 0) {
-                stepsHtml = `<ol>${slide.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${stepsHtml}
-            `;
+            appendText('h3', slide.title || '');
+            appendList('ol', slide.steps);
             break;
         case 'summary':
-            let summaryBullets = '';
-            if (slide.bullets && slide.bullets.length > 0) {
-                summaryBullets = `<ul>${slide.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
-            }
-            section.innerHTML = `
-                <h3>${slide.title || ''}</h3>
-                ${summaryBullets}
-            `;
+            appendText('h3', slide.title || '');
+            appendList('ul', slide.bullets);
             break;
         default:
-            section.innerHTML = `
-                ${slide.title ? `<h3>${slide.title}</h3>` : ''}
-                ${slide.content || ''}
-            `;
+            if (slide.title) appendText('h3', slide.title);
+            if (slide.content) appendText('p', slide.content);
             break;
     }
 
@@ -180,20 +206,37 @@ function createSlideElement(slide) {
         section.appendChild(imgEl);
     }
 
-    if (slide.links && slide.links.length > 0) {
+    if (Array.isArray(slide.links) && slide.links.length > 0) {
         const linksContainer = document.createElement('div');
         linksContainer.classList.add('slide-links-container', 'hidden-links');
         
         slide.links.forEach(link => {
+            if (!link || typeof link.url !== 'string') {
+                console.warn('Ignoring slide link with an invalid URL:', link);
+                return;
+            }
+
+            let url;
+            try {
+                url = new URL(link.url, document.baseURI);
+            } catch (error) {
+                console.warn('Ignoring slide link with an invalid URL:', link.url, error);
+                return;
+            }
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                console.warn('Ignoring slide link with a disallowed URL protocol:', link.url);
+                return;
+            }
+
             const a = document.createElement('a');
-            a.href = link.url;
-            a.textContent = link.text;
+            a.href = url.href;
+            a.textContent = link.text ?? '';
             a.target = '_blank';
+            a.rel = 'noopener noreferrer';
             a.classList.add('slide-link');
             linksContainer.appendChild(a);
         });
-        
-        section.appendChild(linksContainer);
+        if (linksContainer.childElementCount > 0) section.appendChild(linksContainer);
     }
 
     if (slide.notes) {
@@ -240,79 +283,39 @@ function initUIControlsForHtml(weekConfig) {
     setupDrawerBasicBehavior();
 
     const weeksList = document.getElementById('weeks-list');
-    if (weeksList) {
-        weeksList.innerHTML = '';
-
-        const dashLi = document.createElement('li');
-        dashLi.classList.add('dashboard-link-item');
-        const dashA = document.createElement('a');
-        dashA.href = 'index.html';
-        dashA.innerHTML = '<strong>Πίνακας Ελέγχου (Dashboard)</strong>';
-        dashLi.appendChild(dashA);
-        weeksList.appendChild(dashLi);
-
-        const hrLi = document.createElement('li');
-        hrLi.innerHTML = '<hr style="border: 0; border-top: 1px solid #334155; margin: 12px 0;">';
-        weeksList.appendChild(hrLi);
-
-        const titleLi = document.createElement('li');
-        titleLi.innerHTML = `<span style="font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Εξωτερική Παρουσίαση HTML (Εβδ. ${weekConfig.id})</span>`;
-        titleLi.style.marginBottom = '8px';
-        weeksList.appendChild(titleLi);
-    }
+    if (weeksList) populateDrawerHeader(weeksList, `Εξωτερική Παρουσίαση HTML (Εβδ. ${weekConfig.id})`);
 }
 
 function initUIControlsForJs(currentData) {
     setupDrawerBasicBehavior();
 
     const weeksList = document.getElementById('weeks-list');
-    if (weeksList) {
-        weeksList.innerHTML = '';
+    if (!weeksList) return;
 
-        const dashLi = document.createElement('li');
-        dashLi.classList.add('dashboard-link-item');
-        const dashA = document.createElement('a');
-        dashA.href = 'index.html';
-        dashA.innerHTML = '<strong>Πίνακας Ελέγχου (Dashboard)</strong>';
-        dashLi.appendChild(dashA);
-        weeksList.appendChild(dashLi);
+    populateDrawerHeader(weeksList, `Διαφάνειες Εβδομάδας ${currentData.week || ''}`);
+    const slides = currentData.slides || [];
+    let slideIndex = 0;
 
-        const hrLi = document.createElement('li');
-        hrLi.innerHTML = '<hr style="border: 0; border-top: 1px solid #334155; margin: 12px 0;">';
-        weeksList.appendChild(hrLi);
+    slides.forEach((slide) => {
+        const mainNumberStr = `${slideIndex + 1}`;
 
-        const titleLi = document.createElement('li');
-        titleLi.innerHTML = `<span style="font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Διαφάνειες Εβδομάδας ${currentData.week || ''}</span>`;
-        titleLi.style.marginBottom = '8px';
-        weeksList.appendChild(titleLi);
+        if (slide.subslides && Array.isArray(slide.subslides)) {
+            slide.subslides.forEach((subslide, subIndex) => {
+                const rawTitle = subslide.title || slide.title || 'Διαφάνεια';
 
-        const slides = currentData.slides || [];
-        let slideIndex = 0;
-
-        slides.forEach((slide) => {
-            const mainNumberStr = `${slideIndex + 1}`;
-
-            if (slide.subslides && Array.isArray(slide.subslides)) {
-                slide.subslides.forEach((subslide, subIndex) => {
-                    const rawTitle = subslide.title || slide.title || 'Διαφάνεια';
-
-                    if (subIndex === 0) {
-                        const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, subIndex, 1);
-                        weeksList.appendChild(li);
-                    } else {
-                        const subNumberStr = `${slideIndex + 1}.${subIndex}`;
-                        const li = createSlideLinkItem(subNumberStr, rawTitle, slideIndex, subIndex, 2);
-                        weeksList.appendChild(li);
-                    }
-                });
-            } else {
-                const rawTitle = slide.title || 'Διαφάνεια';
-                const li = createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, null, 1);
-                weeksList.appendChild(li);
-            }
-            slideIndex++;
-        });
-    }
+                if (subIndex === 0) {
+                    weeksList.appendChild(createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, subIndex, 1));
+                } else {
+                    const subNumberStr = `${slideIndex + 1}.${subIndex}`;
+                    weeksList.appendChild(createSlideLinkItem(subNumberStr, rawTitle, slideIndex, subIndex, 2));
+                }
+            });
+        } else {
+            const rawTitle = slide.title || 'Διαφάνεια';
+            weeksList.appendChild(createSlideLinkItem(mainNumberStr, rawTitle, slideIndex, null, 1));
+        }
+        slideIndex++;
+    });
 }
 
 function setupDrawerBasicBehavior() {
@@ -341,6 +344,40 @@ function setupDrawerBasicBehavior() {
     if (closeBtn && drawer) {
         closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
     }
+}
+
+function populateDrawerHeader(weeksList, title) {
+    weeksList.replaceChildren();
+
+    const dashLi = document.createElement('li');
+    dashLi.classList.add('dashboard-link-item');
+    const dashA = document.createElement('a');
+    dashA.href = 'index.html';
+    const dashLabel = document.createElement('strong');
+    dashLabel.textContent = 'Πίνακας Ελέγχου (Dashboard)';
+    dashA.appendChild(dashLabel);
+    dashLi.appendChild(dashA);
+    weeksList.appendChild(dashLi);
+
+    const hrLi = document.createElement('li');
+    const divider = document.createElement('hr');
+    divider.style.border = '0';
+    divider.style.borderTop = '1px solid #334155';
+    divider.style.margin = '12px 0';
+    hrLi.appendChild(divider);
+    weeksList.appendChild(hrLi);
+
+    const titleLi = document.createElement('li');
+    const sectionTitle = document.createElement('span');
+    sectionTitle.textContent = title;
+    sectionTitle.style.fontSize = '0.85rem';
+    sectionTitle.style.color = '#94a3b8';
+    sectionTitle.style.textTransform = 'uppercase';
+    sectionTitle.style.letterSpacing = '0.5px';
+    sectionTitle.style.fontWeight = 'bold';
+    titleLi.appendChild(sectionTitle);
+    titleLi.style.marginBottom = '8px';
+    weeksList.appendChild(titleLi);
 }
 
 function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, level) {
@@ -376,13 +413,4 @@ function createSlideLinkItem(numberStr, titleText, hIndex, vIndex, level) {
 
     li.appendChild(a);
     return li;
-}
-
-function escapeHtml(text) {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
 }

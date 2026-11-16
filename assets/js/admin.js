@@ -3,6 +3,8 @@
    Σενάριο Λειτουργιών Πίνακα Διαχείρισης (`admin.html`)
    ========================================================================== */
 
+let projectDirectoryHandle = null;
+
 function loadExistingConfig() {
   if (typeof window.CONFIG === 'undefined') return;
 
@@ -94,6 +96,7 @@ function createWeekRow(item = {}) {
   row.className = 'row week-item';
   const idInput = createInput('number', 'week-id', 'ΑΡ', item.id ?? '');
   idInput.style.width = '60px';
+  idInput.addEventListener('change', () => onWeekIdChange(row));
 
   const typeSelect = document.createElement('select');
   typeSelect.className = 'week-type';
@@ -144,17 +147,158 @@ function addWeekRow() {
 /* Αυτόματη αλλαγή προεπιλεγμένης διαδρομής αρχείου ανάλογα με τον τύπο */
 function onWeekTypeChange(selectEl) {
   const row = selectEl.closest('.week-item');
+  if (!row) return;
+  updateWeekFilePath(row);
+  if (selectEl.value === 'html') ensureHtmlWeekFromRow(row);
+}
+
+function onWeekIdChange(row) {
+  updateWeekFilePath(row);
+  if (row.querySelector('.week-type').value === 'html') ensureHtmlWeekFromRow(row);
+}
+
+function updateWeekFilePath(row) {
   const idInput = row.querySelector('.week-id');
   const fileInput = row.querySelector('.week-file');
   if (!idInput || !fileInput) return;
 
-  const num = parseInt(idInput.value, 10) || 1;
+  const parsedNum = parseInt(idInput.value, 10);
+  if (!Number.isSafeInteger(parsedNum) || parsedNum < 1) return;
+  const num = parsedNum;
   const padId = String(num).padStart(2, '0');
 
-  if (selectEl.value === 'html') {
+  if (row.querySelector('.week-type').value === 'html') {
     fileInput.value = `assets/content/week${padId}/index.html`;
   } else {
     fileInput.value = `assets/data/week${padId}.js`;
+  }
+}
+
+function createHtmlWeekTemplate(title) {
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+  const safeTitle = escapeHtml(title || 'Νέα Παρουσίαση');
+
+  return `<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeTitle}</title>
+  <link rel="stylesheet" href="../../libs/reveal/reveal.css">
+  <link rel="stylesheet" href="../../libs/reveal/theme/white.css">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <h1>${safeTitle}</h1>
+        <p>Αντικαταστήστε αυτό το περιεχόμενο με τις διαφάνειες της εβδομάδας.</p>
+      </section>
+    </div>
+  </div>
+  <script src="../../libs/reveal/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      hash: true,
+      slideNumber: 'c/t'
+    });
+  </script>
+</body>
+</html>
+`;
+}
+
+async function ensureHtmlWeekFile(row) {
+  if (!projectDirectoryHandle) {
+    throw new Error('Επιλέξτε πρώτα τον βασικό φάκελο του project.');
+  }
+
+  const filePath = row.querySelector('.week-file').value.trim();
+  const segments = filePath.split(/[\\/]/);
+  if (segments.length < 4 ||
+      segments[0] !== 'assets' ||
+      segments[1] !== 'content' ||
+      segments[segments.length - 1] !== 'index.html' ||
+      segments.slice(2, -1).some(segment => !/^[a-z0-9_-]+$/i.test(segment))) {
+    throw new Error('Η διαδρομή HTML πρέπει να είναι μέσα στο assets/content και να τελειώνει σε index.html.');
+  }
+
+  const permission = await projectDirectoryHandle.queryPermission({ mode: 'readwrite' });
+  const writePermission = permission === 'granted'
+    ? permission
+    : await projectDirectoryHandle.requestPermission({ mode: 'readwrite' });
+  if (writePermission !== 'granted') {
+    throw new Error('Δεν δόθηκε άδεια εγγραφής στον φάκελο του project.');
+  }
+
+  let directory = await projectDirectoryHandle.getDirectoryHandle('assets');
+  directory = await directory.getDirectoryHandle('content');
+  for (const segment of segments.slice(2, -1)) {
+    directory = await directory.getDirectoryHandle(segment, { create: true });
+  }
+
+  let fileHandle;
+  let isNewFile = false;
+  try {
+    fileHandle = await directory.getFileHandle('index.html');
+  } catch (error) {
+    if (error.name !== 'NotFoundError') throw error;
+    fileHandle = await directory.getFileHandle('index.html', { create: true });
+    isNewFile = true;
+  }
+
+  if (isNewFile) {
+    const writable = await fileHandle.createWritable();
+    await writable.write(createHtmlWeekTemplate(row.querySelector('.week-title').value));
+    await writable.close();
+  }
+
+  return isNewFile;
+}
+
+async function ensureHtmlWeeks(rows = [...document.querySelectorAll('.week-item')]) {
+  const htmlRows = rows.filter(row => row.querySelector('.week-type').value === 'html');
+  let createdCount = 0;
+  for (const row of htmlRows) {
+    if (await ensureHtmlWeekFile(row)) createdCount++;
+  }
+  return { createdCount, existingCount: htmlRows.length - createdCount };
+}
+
+function ensureHtmlWeekFromRow(row) {
+  if (!projectDirectoryHandle) {
+    showNotification('Επιλέξτε τον φάκελο του project για να δημιουργηθεί το HTML αρχείο.');
+    return;
+  }
+  ensureHtmlWeeks([row]).catch(error => {
+    console.error('Αποτυχία εξασφάλισης HTML αρχείου εβδομάδας:', error);
+    showNotification(`Αποτυχία δημιουργίας HTML αρχείου: ${error.message}`);
+  });
+}
+
+async function selectProjectDirectory() {
+  if (!window.showDirectoryPicker) {
+    showNotification('Ο browser δεν υποστηρίζει επιλογή φακέλου. Ανοίξτε το admin μέσω συμβατού browser σε localhost ή HTTPS.');
+    return;
+  }
+
+  try {
+    projectDirectoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    const { createdCount, existingCount } = await ensureHtmlWeeks();
+    showNotification(`HTML εβδομάδες: ${createdCount} νέα αρχεία, ${existingCount} ήδη υπάρχοντα.`);
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    projectDirectoryHandle = null;
+    console.error('Αποτυχία πρόσβασης στον φάκελο του project:', error);
+    showNotification(`Δεν ήταν δυνατή η εξασφάλιση των HTML αρχείων: ${error.message}`);
   }
 }
 
@@ -175,25 +319,18 @@ function reindexWeeks() {
   const rows = document.querySelectorAll('#weeksContainer .week-item');
   rows.forEach((row, index) => {
     const newNum = index + 1;
-    const padId = String(newNum).padStart(2, '0');
-    
     const idInput = row.querySelector('.week-id');
     if (idInput) idInput.value = newNum;
     
     const typeSelect = row.querySelector('.week-type');
-    const fileInput = row.querySelector('.week-file');
-    
-    if (fileInput) {
-      if (typeSelect && typeSelect.value === 'html') {
-        fileInput.value = `assets/content/week${padId}/index.html`;
-      } else {
-        fileInput.value = `assets/data/week${padId}.js`;
-      }
+    if (typeSelect) {
+      updateWeekFilePath(row);
+      if (typeSelect.value === 'html') ensureHtmlWeekFromRow(row);
     }
   });
 }
 
-function generateConfig() {
+async function generateConfig() {
   const scheduleItems = [];
   const weekItems = [];
 
@@ -210,6 +347,14 @@ function generateConfig() {
       title: row.querySelector('.week-title').value,
       file: row.querySelector('.week-file').value
     });
+  }
+
+  try {
+    await ensureHtmlWeeks();
+  } catch (error) {
+    console.error('Αποτυχία εξασφάλισης HTML αρχείων εβδομάδων:', error);
+    showNotification(`Δεν δημιουργήθηκε η ρύθμιση: ${error.message}`);
+    return;
   }
 
   document.querySelectorAll('.schedule-item').forEach(row => {

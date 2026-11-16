@@ -39,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     weekTitleEl.textContent = `Εβδομάδα ${weekDataConfig.id}: ${currentData.displayTitle}`;
                 }
 
-                buildSlides(currentData.slides);
+                buildSlides(currentData.slides, {
+                    showNotes: currentData.showNotes !== false,
+                    showLinks: currentData.showLinks === true
+                });
                 initReveal(currentData.reveal);
                 initUIControlsForJs(currentData);
             })
@@ -128,7 +131,7 @@ function setupHtmlPresentation(weekConfig) {
     initUIControlsForHtml(weekConfig);
 }
 
-function buildSlides(slides) {
+function buildSlides(slides, settings = {}) {
     const container = document.getElementById('slidesContainer');
     if (!container) return;
 
@@ -138,18 +141,18 @@ function buildSlides(slides) {
         if (slide.subslides && Array.isArray(slide.subslides)) {
             const parentSection = document.createElement('section');
             slide.subslides.forEach(subslide => {
-                const childSection = createSlideElement(subslide);
+                const childSection = createSlideElement(subslide, settings);
                 parentSection.appendChild(childSection);
             });
             container.appendChild(parentSection);
         } else {
-            const section = createSlideElement(slide);
+            const section = createSlideElement(slide, settings);
             container.appendChild(section);
         }
     });
 }
 
-function createSlideElement(slide) {
+function createSlideElement(slide, settings = {}) {
     const section = document.createElement('section');
     if (slide.attributes && typeof slide.attributes === 'object' && !Array.isArray(slide.attributes)) {
         Object.entries(slide.attributes).forEach(([name, value]) => {
@@ -165,71 +168,125 @@ function createSlideElement(slide) {
         parent.appendChild(element);
         return element;
     };
+    const fragmentEffects = new Set([
+        'fade-in', 'fade-out', 'fade-up', 'fade-down', 'fade-left', 'fade-right',
+        'grow', 'shrink', 'highlight-red', 'highlight-green', 'highlight-blue'
+    ]);
+    const fragmentEffect = fragmentEffects.has(slide.fragmentEffect) ? slide.fragmentEffect : '';
+    const addFragmentEffect = element => {
+        if (fragmentEffect) element.classList.add('fragment', fragmentEffect);
+        return element;
+    };
+    const appendContentText = (tagName, text, parent = section) =>
+        addFragmentEffect(appendText(tagName, text, parent));
+    const appendImage = (parent, useFigure = false) => {
+        const image = document.createElement('img');
+        image.src = slide.image;
+        image.alt = slide.imageCaption || slide.title || 'Slide Image';
+        image.classList.add('slide-image');
+        if (useFigure || slide.imageCaption) {
+            const figure = document.createElement('figure');
+            figure.classList.add('slide-image-figure');
+            addFragmentEffect(figure);
+            figure.appendChild(image);
+            if (slide.imageCaption) {
+                const caption = document.createElement('figcaption');
+                caption.textContent = slide.imageCaption;
+                figure.appendChild(caption);
+            }
+            parent.appendChild(figure);
+        } else {
+            addFragmentEffect(image);
+            parent.appendChild(image);
+        }
+    };
     const appendList = (tagName, items) => {
         if (!Array.isArray(items) || items.length === 0) return;
 
         const list = document.createElement(tagName);
-        items.forEach(item => appendText('li', item, list));
+        items.forEach(item => appendContentText('li', item, list));
         section.appendChild(list);
     };
 
-    if (typeof slide.html === 'string') {
-        if (slide.title) appendText('h2', slide.title);
-        const content = document.createElement('template');
-        content.innerHTML = slide.html;
-        section.appendChild(content.content.cloneNode(true));
-    } else switch (slide.type) {
-        case 'intro':
-            appendText('h2', slide.title || '');
-            if (slide.subtitle) appendText('h3', slide.subtitle);
-            break;
-        case 'theory':
-            appendText('h3', slide.title || '');
-            appendList('ul', slide.bullets);
-            if (slide.content) appendText('p', slide.content);
-            break;
-        case 'code':
-            appendText('h3', slide.title || '');
+    const hasImageOnlyLayout = slide.layout === 'image' && typeof slide.image === 'string' && slide.image;
+    const hasTwoColumnImage = slide.layout === 'two-column' && typeof slide.image === 'string' && slide.image;
+    if (hasImageOnlyLayout) {
+        if (slide.title) appendText('h3', slide.title);
+        appendImage(section, true);
+    } else if (hasTwoColumnImage) {
+        if (slide.title) appendText('h3', slide.title);
+        const columns = document.createElement('div');
+        columns.classList.add('slide-two-column');
+        const textColumn = document.createElement('div');
+        textColumn.classList.add('slide-two-column-text');
+        if (slide.content) appendContentText('p', slide.content, textColumn);
+        const imageColumn = document.createElement('div');
+        imageColumn.classList.add('slide-two-column-image');
+        appendImage(imageColumn, true);
+        columns.append(textColumn, imageColumn);
+        section.appendChild(columns);
+    } else {
+        if (typeof slide.html === 'string') {
+            if (slide.title) appendText('h2', slide.title);
+            const content = document.createElement('template');
+            content.innerHTML = slide.html;
+            if (fragmentEffect) {
+                const wrapper = document.createElement('div');
+                addFragmentEffect(wrapper);
+                wrapper.appendChild(content.content.cloneNode(true));
+                section.appendChild(wrapper);
+            } else {
+                section.appendChild(content.content.cloneNode(true));
+            }
+        } else switch (slide.type) {
+            case 'intro':
+                appendText('h2', slide.title || '');
+                if (slide.subtitle) appendText('h3', slide.subtitle);
+                break;
+            case 'theory':
+                appendText('h3', slide.title || '');
+                appendList('ul', slide.bullets);
+                break;
+            case 'code': {
+                appendText('h3', slide.title || '');
+                break;
+            }
+            case 'lab':
+                appendText('h3', slide.title || '');
+                appendList('ol', slide.steps);
+                break;
+            case 'summary':
+                appendText('h3', slide.title || '');
+                appendList('ul', slide.bullets);
+                break;
+            default:
+                if (slide.title) appendText('h3', slide.title);
+                break;
+        }
+        if (slide.content) appendContentText('p', slide.content);
+        if (slide.image) appendImage(section);
+        if (typeof slide.codeSnippet === 'string' && slide.codeSnippet) {
             const pre = document.createElement('pre');
             const code = document.createElement('code');
             const language = typeof slide.language === 'string' && /^[a-z0-9_-]+$/i.test(slide.language)
                 ? slide.language
                 : 'javascript';
             code.classList.add(`language-${language}`);
-            code.textContent = slide.codeSnippet || '';
+            code.textContent = slide.codeSnippet;
             pre.appendChild(code);
+            addFragmentEffect(pre);
             section.appendChild(pre);
-            if (slide.explanation) {
-                const explanation = document.createElement('p');
-                appendText('small', slide.explanation, explanation);
-                section.appendChild(explanation);
-            }
-            break;
-        case 'lab':
-            appendText('h3', slide.title || '');
-            appendList('ol', slide.steps);
-            break;
-        case 'summary':
-            appendText('h3', slide.title || '');
-            appendList('ul', slide.bullets);
-            break;
-        default:
-            if (slide.title) appendText('h3', slide.title);
-            if (slide.content) appendText('p', slide.content);
-            break;
-    }
-
-    if (slide.image) {
-        const imgEl = document.createElement('img');
-        imgEl.src = slide.image;
-        imgEl.alt = slide.title || 'Slide Image';
-        imgEl.classList.add('slide-image');
-        section.appendChild(imgEl);
+        }
+        if (slide.explanation) {
+            const explanation = appendContentText('p', '');
+            appendText('small', slide.explanation, explanation);
+        }
     }
 
     if (Array.isArray(slide.links) && slide.links.length > 0) {
         const linksContainer = document.createElement('div');
-        linksContainer.classList.add('slide-links-container', 'hidden-links');
+        linksContainer.classList.add('slide-links-container');
+        if (!settings.showLinks) linksContainer.classList.add('hidden-links');
         
         slide.links.forEach(link => {
             if (!link || typeof link.url !== 'string') {
@@ -260,7 +317,7 @@ function createSlideElement(slide) {
         if (linksContainer.childElementCount > 0) section.appendChild(linksContainer);
     }
 
-    if (slide.notes) {
+    if (slide.notes && settings.showNotes !== false) {
         const notesEl = document.createElement('aside');
         notesEl.classList.add('notes');
         notesEl.textContent = slide.notes;
@@ -316,6 +373,8 @@ function initUIControlsForHtml(weekConfig) {
 }
 
 function initUIControlsForJs(currentData) {
+    const linkToggle = document.getElementById('link-toggle-checkbox');
+    if (linkToggle) linkToggle.checked = currentData.showLinks === true;
     setupDrawerBasicBehavior();
 
     const weeksList = document.getElementById('weeks-list');

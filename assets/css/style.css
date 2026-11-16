@@ -262,28 +262,51 @@ button:hover, .btn:hover {
   text-decoration: none;
 }
 
-.editor-title {
-  margin-top: 16px;
-}
-
-.editor-field {
-  margin: 14px 0;
-}
-
-.slide-editor {
+.editor-tool {
+  margin: 20px 0;
+  padding: 16px;
   border: 1px solid var(--border-color);
-  box-shadow: none;
+  border-radius: 6px;
+  background: #f8fafc;
 }
 
-.slide-editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.editor-tool h3 {
+  margin: 0 0 12px;
+  color: #0f172a;
+}
+
+.editor-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
+  margin-bottom: 12px;
 }
 
-.slide-editor-header h3 {
+.editor-tool-wide {
+  grid-column: 1 / -1;
+}
+
+.editor-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  font-weight: 600;
+}
+
+.editor-checkbox input {
+  width: auto;
   margin: 0;
+}
+
+#weekData {
+  min-height: 420px;
+}
+
+.editor-status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  color: var(--text-muted);
 }
 
 .btn-primary-full {
@@ -484,8 +507,44 @@ pre {
 
 .slide-image {
   max-height: 400px;
+  max-width: 100%;
   object-fit: contain;
   margin-top: 15px;
+}
+
+.slide-image-figure {
+  margin: 0;
+}
+
+.slide-image-figure figcaption {
+  margin-top: 8px;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.slide-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.slide-two-column-text,
+.slide-two-column-image {
+  min-width: 0;
+}
+
+.slide-two-column-image .slide-image {
+  max-height: 420px;
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  .slide-two-column {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* Σωστή τοποθέτηση του Reveal.js κάτω από την επάνω μπάρα (50px) */

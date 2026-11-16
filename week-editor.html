@@ -19,10 +19,6 @@
         <label for="weekSelect">Εβδομάδα JS</label>
         <select id="weekSelect"></select>
       </div>
-      <div class="form-group editor-title">
-        <label for="weekTitle">Τίτλος παρουσίασης</label>
-        <input id="weekTitle" type="text" placeholder="Τίτλος εβδομάδας">
-      </div>
       <div class="actions">
         <button type="button" id="selectDirectoryButton">Επιλογή φακέλου project</button>
         <button type="button" id="generateButton" class="btn-success">Παραγωγή αρχείου JS</button>
@@ -31,19 +27,172 @@
     </section>
 
     <section class="card">
-      <h2>Ρυθμίσεις reveal.js</h2>
-      <p>Ορίστε οποιαδήποτε σειριοποιήσιμη ρύθμιση του reveal.js σε JSON. Τα plugins που περιλαμβάνονται τοπικά είναι Markdown, Notes, Search, Zoom και Math/KaTeX.</p>
-      <div class="form-group">
-        <label for="revealOptions">Επιλογές Reveal (JSON)</label>
-        <textarea id="revealOptions" rows="12" spellcheck="false"></textarea>
-      </div>
-    </section>
+      <h2>Περιεχόμενο εβδομάδας</h2>
+      <p>Χρησιμοποιήστε τα εργαλεία για να επιλέξετε πού θα προστεθεί το περιεχόμενο ή ποια λειτουργία θα ενεργοποιηθεί. Το JSON παραμένει διαθέσιμο για προχωρημένες αλλαγές.</p>
 
-    <section class="card">
-      <h2>Διαφάνειες</h2>
-      <p>Ο τίτλος εμφανίζεται ως επικεφαλίδα. Το HTML κάθε διαφάνειας υποστηρίζει τα χαρακτηριστικά του reveal.js, όπως fragments, backgrounds, media, κάθετες διαφάνειες και auto-animate. Οι διαδρομές αρχείων πρέπει να δείχνουν σε τοπικά αρχεία για χρήση χωρίς internet.</p>
-      <div id="slidesContainer"></div>
-      <button type="button" id="addSlideButton">+ Προσθήκη διαφάνειας</button>
+      <div class="editor-tool">
+        <h3>Προσθήκη κειμένου ή περιεχομένου</h3>
+        <p>Επιλέξτε πεδίο, διαφάνεια και τρόπο εισαγωγής, γράψτε το κείμενο και πατήστε το κουμπί. Δεν χρειάζεται να τοποθετήσετε τον δρομέα στο JSON.</p>
+        <div class="editor-tool-grid">
+          <div class="form-group">
+            <label for="textTarget">Πεδίο προορισμού</label>
+            <select id="textTarget">
+              <option value="week_title">Τίτλος εβδομάδας</option>
+              <option value="slide_title">Τίτλος διαφάνειας</option>
+              <option value="slide_content">Κείμενο/περιεχόμενο διαφάνειας</option>
+              <option value="code">Κώδικας παραδείγματος</option>
+              <option value="explanation">Επεξήγηση κώδικα</option>
+              <option value="notes">Σημειώσεις ομιλητή</option>
+              <option value="html">Περιεχόμενο HTML</option>
+              <option value="links">Σύνδεσμος</option>
+              <option value="image">Εικόνα με λεζάντα</option>
+              <option value="two_column">Κείμενο αριστερά και εικόνα δεξιά</option>
+            </select>
+          </div>
+          <div class="form-group" id="textSlideGroup">
+            <label for="textSlide">Διαφάνεια</label>
+            <select id="textSlide"></select>
+          </div>
+          <div class="form-group" id="insertModeGroup">
+            <label for="insertMode">Τρόπος εισαγωγής</label>
+            <select id="insertMode">
+              <option value="append">Προσθήκη στο τέλος</option>
+              <option value="replace">Αντικατάσταση υπάρχοντος κειμένου</option>
+            </select>
+          </div>
+          <div class="form-group editor-tool-wide" id="toolTextGroup">
+            <label for="toolText" id="toolTextLabel">Κείμενο</label>
+            <textarea id="toolText" rows="3" placeholder="Γράψτε εδώ το κείμενο που θέλετε να προσθέσετε"></textarea>
+          </div>
+          <div class="form-group is-hidden" id="toolLanguageGroup">
+            <label for="toolLanguage">Γλώσσα κώδικα</label>
+            <select id="toolLanguage">
+              <option value="javascript">JavaScript</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="json">JSON</option>
+              <option value="python">Python</option>
+              <option value="bash">Bash</option>
+            </select>
+          </div>
+          <div class="form-group is-hidden" id="toolUrlGroup">
+            <label for="toolUrl">URL συνδέσμου</label>
+            <input id="toolUrl" type="url" placeholder="https://example.com">
+          </div>
+          <div class="form-group is-hidden" id="toolImageGroup">
+            <label for="toolImage">Διαδρομή ή URL εικόνας</label>
+            <input id="toolImage" type="text" placeholder="assets/images/example.jpg">
+          </div>
+          <div class="form-group is-hidden" id="toolCaptionGroup">
+            <label for="toolCaption">Λεζάντα εικόνας</label>
+            <input id="toolCaption" type="text" placeholder="Περιγραφή εικόνας">
+          </div>
+        </div>
+        <button type="button" id="insertContentButton">Εισαγωγή στο επιλεγμένο πεδίο</button>
+      </div>
+
+      <div class="editor-tool">
+        <h3>Προσθήκη έτοιμης διαφάνειας</h3>
+        <p>Επιλέξτε τύπο και θέση. Για εισαγωγή πριν ή μετά από υπάρχουσα διαφάνεια, επιλέξτε και τη διαφάνεια.</p>
+        <div class="editor-tool-grid">
+          <div class="form-group">
+            <label for="slideTemplate">Τύπος διαφάνειας</label>
+            <select id="slideTemplate">
+              <option value="">Επιλέξτε πρότυπο</option>
+              <option value="intro">Εισαγωγή</option>
+              <option value="theory">Θεωρία</option>
+              <option value="code">Παράδειγμα κώδικα</option>
+              <option value="lab">Άσκηση εργαστηρίου</option>
+              <option value="summary">Ανακεφαλαίωση</option>
+              <option value="subslides">Κατακόρυφες υποδιαφάνειες</option>
+              <option value="html">Διαφάνεια HTML (Reveal.js)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="slidePlacement">Θέση διαφάνειας</label>
+            <select id="slidePlacement">
+              <option value="end">Στο τέλος</option>
+              <option value="before">Πριν από επιλεγμένη διαφάνεια</option>
+              <option value="after">Μετά από επιλεγμένη διαφάνεια</option>
+            </select>
+          </div>
+          <div class="form-group is-hidden" id="templateSlideGroup">
+            <label for="templateSlide">Επιλεγμένη διαφάνεια</label>
+            <select id="templateSlide"></select>
+          </div>
+        </div>
+        <button type="button" id="insertTemplateButton">Προσθήκη διαφάνειας</button>
+      </div>
+
+      <div class="editor-tool">
+        <h3>Λειτουργίες και εφέ παρουσίασης</h3>
+        <p>Επιλέξτε τις λειτουργίες και τα εφέ και πατήστε «Εφαρμογή». Οι ρυθμίσεις αποθηκεύονται στα δεδομένα της εβδομάδας.</p>
+        <div class="editor-tool-grid">
+          <label class="editor-checkbox"><input id="revealControls" type="checkbox"> Κουμπιά πλοήγησης</label>
+          <label class="editor-checkbox"><input id="revealProgress" type="checkbox"> Μπάρα προόδου</label>
+          <label class="editor-checkbox"><input id="revealCenter" type="checkbox"> Κεντράρισμα διαφανειών</label>
+          <label class="editor-checkbox"><input id="revealHash" type="checkbox"> Πλοήγηση μέσω URL/hash</label>
+          <label class="editor-checkbox"><input id="showNotes" type="checkbox"> Εμφάνιση σημειώσεων ομιλητή</label>
+          <label class="editor-checkbox"><input id="showLinks" type="checkbox"> Εμφάνιση συνδέσμων</label>
+          <div class="form-group">
+            <label for="slideNumberMode">Αρίθμηση διαφανειών</label>
+            <select id="slideNumberMode">
+              <option value="off">Ανενεργή</option>
+              <option value="number">Αριθμός διαφάνειας</option>
+              <option value="current-total">Τρέχουσα / σύνολο</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="transitionEffect">Εφέ μετάβασης διαφανειών</label>
+            <select id="transitionEffect">
+              <option value="none">Κανένα</option>
+              <option value="fade">Fade</option>
+              <option value="slide">Slide</option>
+              <option value="convex">Convex</option>
+              <option value="concave">Concave</option>
+              <option value="zoom">Zoom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="backgroundEffect">Εφέ μετάβασης φόντου</label>
+            <select id="backgroundEffect">
+              <option value="none">Κανένα</option>
+              <option value="fade">Fade</option>
+              <option value="slide">Slide</option>
+              <option value="convex">Convex</option>
+              <option value="concave">Concave</option>
+              <option value="zoom">Zoom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="effectSlide">Διαφάνεια για εφέ εμφάνισης</label>
+            <select id="effectSlide"></select>
+          </div>
+          <div class="form-group">
+            <label for="contentEffect">Εφέ εμφάνισης περιεχομένου</label>
+            <select id="contentEffect">
+              <option value="none">Κανένα</option>
+              <option value="fade-in">Fade in</option>
+              <option value="fade-up">Fade up</option>
+              <option value="fade-down">Fade down</option>
+              <option value="fade-left">Fade left</option>
+              <option value="fade-right">Fade right</option>
+              <option value="grow">Grow</option>
+              <option value="shrink">Shrink</option>
+              <option value="highlight-red">Highlight red</option>
+              <option value="highlight-green">Highlight green</option>
+              <option value="highlight-blue">Highlight blue</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" id="applySettingsButton">Εφαρμογή λειτουργιών και εφέ</button>
+      </div>
+
+      <div class="form-group">
+        <label for="weekData">Πλήρη δεδομένα εβδομάδας (JSON)</label>
+        <textarea id="weekData" rows="28" spellcheck="false" aria-describedby="weekDataStatus"></textarea>
+        <p id="weekDataStatus" class="editor-status" aria-live="polite"></p>
+      </div>
     </section>
 
     <section class="card">

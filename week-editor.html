@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Επεξεργαστής Παρουσιάσεων Εβδομάδων</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <main class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Επεξεργαστής Παρουσιάσεων</h1>
+      <p>Δημιουργία περιεχομένου εβδομάδας για τοπική παρουσίαση με reveal.js.</p>
+    </header>
+
+    <section class="card">
+      <p><a href="admin.html">← Επιστροφή στη διαχείριση</a></p>
+      <div class="form-group">
+        <label for="weekSelect">Εβδομάδα JS</label>
+        <select id="weekSelect"></select>
+      </div>
+      <div class="form-group editor-title">
+        <label for="weekTitle">Τίτλος παρουσίασης</label>
+        <input id="weekTitle" type="text" placeholder="Τίτλος εβδομάδας">
+      </div>
+      <div class="actions">
+        <button type="button" id="selectDirectoryButton">Επιλογή φακέλου project</button>
+        <button type="button" id="generateButton" class="btn-success">Παραγωγή αρχείου JS</button>
+      </div>
+      <p id="directoryStatus" class="directory-status" aria-live="polite">Δεν έχει επιλεγεί φάκελος project. Η λήψη αρχείου παραμένει διαθέσιμη.</p>
+    </section>
+
+    <section class="card">
+      <h2>Ρυθμίσεις reveal.js</h2>
+      <p>Ορίστε οποιαδήποτε σειριοποιήσιμη ρύθμιση του reveal.js σε JSON. Τα plugins που περιλαμβάνονται τοπικά είναι Markdown, Notes, Search, Zoom και Math/KaTeX.</p>
+      <div class="form-group">
+        <label for="revealOptions">Επιλογές Reveal (JSON)</label>
+        <textarea id="revealOptions" rows="12" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Διαφάνειες</h2>
+      <p>Ο τίτλος εμφανίζεται ως επικεφαλίδα. Το HTML κάθε διαφάνειας υποστηρίζει τα χαρακτηριστικά του reveal.js, όπως fragments, backgrounds, media, κάθετες διαφάνειες και auto-animate. Οι διαδρομές αρχείων πρέπει να δείχνουν σε τοπικά αρχεία για χρήση χωρίς internet.</p>
+      <div id="slidesContainer"></div>
+      <button type="button" id="addSlideButton">+ Προσθήκη διαφάνειας</button>
+    </section>
+
+    <section class="card">
+      <h2>Παραγόμενος κώδικας</h2>
+      <pre id="outputCode" data-generated="false">Συμπληρώστε τα στοιχεία και πατήστε «Παραγωγή αρχείου JS».</pre>
+      <div class="actions">
+        <button type="button" id="copyButton">Αντιγραφή κώδικα</button>
+        <button type="button" id="saveButton" class="btn-success">Αποθήκευση αρχείου εβδομάδας</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="assets/js/week-editor.js"></script>
+</body>
+</html>

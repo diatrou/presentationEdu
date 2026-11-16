@@ -29,7 +29,8 @@ body {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -148,12 +149,19 @@ select:focus-visible {
 }
 
 .form-group input, 
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 8px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   box-sizing: border-box;
+  font: inherit;
+}
+
+.form-group textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  resize: vertical;
 }
 
 .row {
@@ -247,6 +255,35 @@ button, .btn {
 
 button:hover, .btn:hover {
   background: var(--primary-hover);
+}
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.editor-title {
+  margin-top: 16px;
+}
+
+.editor-field {
+  margin: 14px 0;
+}
+
+.slide-editor {
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.slide-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.slide-editor-header h3 {
+  margin: 0;
 }
 
 .btn-primary-full {

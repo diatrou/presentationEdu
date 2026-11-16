@@ -35,8 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                if (weekTitleEl && typeof currentData.displayTitle === 'string' && currentData.displayTitle) {
+                    weekTitleEl.textContent = `Εβδομάδα ${weekDataConfig.id}: ${currentData.displayTitle}`;
+                }
+
                 buildSlides(currentData.slides);
-                initReveal();
+                initReveal(currentData.reveal);
                 initUIControlsForJs(currentData);
             })
             .catch(err => {
@@ -147,6 +151,14 @@ function buildSlides(slides) {
 
 function createSlideElement(slide) {
     const section = document.createElement('section');
+    if (slide.attributes && typeof slide.attributes === 'object' && !Array.isArray(slide.attributes)) {
+        Object.entries(slide.attributes).forEach(([name, value]) => {
+            if (/^[a-z_:][a-z0-9:._-]*$/i.test(name) && !/^on/i.test(name) &&
+                (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
+                section.setAttribute(name, String(value));
+            }
+        });
+    }
     const appendText = (tagName, text, parent = section) => {
         const element = document.createElement(tagName);
         element.textContent = text ?? '';
@@ -161,7 +173,12 @@ function createSlideElement(slide) {
         section.appendChild(list);
     };
 
-    switch (slide.type) {
+    if (typeof slide.html === 'string') {
+        if (slide.title) appendText('h2', slide.title);
+        const content = document.createElement('template');
+        content.innerHTML = slide.html;
+        section.appendChild(content.content.cloneNode(true));
+    } else switch (slide.type) {
         case 'intro':
             appendText('h2', slide.title || '');
             if (slide.subtitle) appendText('h3', slide.subtitle);
@@ -253,9 +270,9 @@ function createSlideElement(slide) {
     return section;
 }
 
-function initReveal() {
+function initReveal(revealOptions = {}) {
     if (typeof Reveal !== 'undefined') {
-        Reveal.initialize({
+        const defaults = {
             controls: true,
             progress: true,
             center: true,
@@ -266,9 +283,13 @@ function initReveal() {
             margin: 0.04,
             katex: {
                 local: 'assets/libs/katex'
-            },
+            }
+        };
+        const options = Object.assign({}, defaults, revealOptions, {
+            katex: Object.assign({}, defaults.katex, revealOptions.katex || {}),
             plugins: [RevealMarkdown, RevealNotes, RevealSearch, RevealZoom, RevealMath.KaTeX]
-        }).then(() => {
+        });
+        Reveal.initialize(options).then(() => {
             if (typeof hljs !== 'undefined') {
                 document.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);

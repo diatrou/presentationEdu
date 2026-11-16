@@ -214,6 +214,21 @@ select:focus-visible {
   text-align: center;
 }
 
+.directory-status {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-main);
+  font-weight: 600;
+}
+
+.directory-status.is-selected {
+  border-color: var(--success);
+  background: #ecfdf5;
+  color: #065f46;
+}
+
 .is-hidden {
   display: none;
 }

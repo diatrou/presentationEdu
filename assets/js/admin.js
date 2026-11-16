@@ -190,27 +190,15 @@ function createHtmlWeekTemplate(title) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeTitle}</title>
-  <link rel="stylesheet" href="../../libs/reveal/reveal.css">
-  <link rel="stylesheet" href="../../libs/reveal/theme/white.css">
+  <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
-  <div class="reveal">
-    <div class="slides">
-      <section>
-        <h1>${safeTitle}</h1>
-        <p>Αντικαταστήστε αυτό το περιεχόμενο με τις διαφάνειες της εβδομάδας.</p>
-      </section>
-    </div>
-  </div>
-  <script src="../../libs/reveal/reveal.js"></script>
-  <script>
-    Reveal.initialize({
-      controls: true,
-      progress: true,
-      hash: true,
-      slideNumber: 'c/t'
-    });
-  </script>
+  <main class="dashboard-container">
+    <article class="card">
+      <h1>${safeTitle}</h1>
+      <p>Αντικαταστήστε αυτό το περιεχόμενο με το υλικό της εβδομάδας.</p>
+    </article>
+  </main>
 </body>
 </html>
 `;
@@ -284,6 +272,17 @@ function ensureHtmlWeekFromRow(row) {
   });
 }
 
+function updateProjectDirectoryStatus() {
+  const status = document.getElementById('projectDirectoryStatus');
+  if (!status) return;
+
+  const directoryName = projectDirectoryHandle?.name;
+  status.textContent = directoryName
+    ? `Επιλεγμένος φάκελος project: ${directoryName}`
+    : 'Δεν έχει επιλεγεί φάκελος project.';
+  status.classList.toggle('is-selected', Boolean(directoryName));
+}
+
 async function selectProjectDirectory() {
   if (!window.showDirectoryPicker) {
     showNotification('Ο browser δεν υποστηρίζει επιλογή φακέλου. Ανοίξτε το admin μέσω συμβατού browser σε localhost ή HTTPS.');
@@ -292,11 +291,13 @@ async function selectProjectDirectory() {
 
   try {
     projectDirectoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    updateProjectDirectoryStatus();
     const { createdCount, existingCount } = await ensureHtmlWeeks();
     showNotification(`HTML εβδομάδες: ${createdCount} νέα αρχεία, ${existingCount} ήδη υπάρχοντα.`);
   } catch (error) {
     if (error.name === 'AbortError') return;
     projectDirectoryHandle = null;
+    updateProjectDirectoryStatus();
     console.error('Αποτυχία πρόσβασης στον φάκελο του project:', error);
     showNotification(`Δεν ήταν δυνατή η εξασφάλιση των HTML αρχείων: ${error.message}`);
   }

@@ -25,12 +25,21 @@
     </div>
   </div>
   <script src="../../libs/reveal/reveal.js"></script>
+  <script src="../../libs/reveal/plugin/markdown.js"></script>
+  <script src="../../libs/reveal/plugin/notes.js"></script>
+  <script src="../../libs/reveal/plugin/search.js"></script>
+  <script src="../../libs/reveal/plugin/zoom.js"></script>
+  <script src="../../libs/reveal/plugin/math.js"></script>
   <script>
     Reveal.initialize({
       controls: true,
       progress: true,
       hash: true,
-      slideNumber: 'c/t'
+      slideNumber: 'c/t',
+      katex: {
+        local: '../../libs/katex'
+      },
+      plugins: [RevealMarkdown, RevealNotes, RevealSearch, RevealZoom, RevealMath.KaTeX]
     });
   </script>
 </body>

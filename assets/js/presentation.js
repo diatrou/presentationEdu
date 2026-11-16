@@ -113,7 +113,11 @@ function setupHtmlPresentation(weekConfig) {
             slideNumber: false,
             width: 1280,
             height: 720,
-            margin: 0.04
+            margin: 0.04,
+            katex: {
+                local: 'assets/libs/katex'
+            },
+            plugins: [RevealMarkdown, RevealNotes, RevealSearch, RevealZoom, RevealMath.KaTeX]
         });
     }
 
@@ -259,7 +263,11 @@ function initReveal() {
             slideNumber: 'c/t',
             width: 1280,
             height: 720,
-            margin: 0.04
+            margin: 0.04,
+            katex: {
+                local: 'assets/libs/katex'
+            },
+            plugins: [RevealMarkdown, RevealNotes, RevealSearch, RevealZoom, RevealMath.KaTeX]
         }).then(() => {
             if (typeof hljs !== 'undefined') {
                 document.querySelectorAll('pre code').forEach((block) => {
